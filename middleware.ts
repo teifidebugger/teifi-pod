@@ -48,7 +48,6 @@ export async function middleware(request: NextRequest) {
             }
         } catch (err) {
             console.error('[middleware] session-access fetch failed', err)
-            return NextResponse.redirect(new URL('/login', request.url))
         }
     }
 
