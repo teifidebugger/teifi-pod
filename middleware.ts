@@ -11,6 +11,14 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
     if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
+        const hasSession =
+            request.cookies.has(SESSION_COOKIE) ||
+            request.cookies.has(SESSION_COOKIE_SECURE)
+
+        if (pathname === '/login' && hasSession) {
+            return NextResponse.redirect(new URL('/', request.url))
+        }
+
         const reqHeaders = new Headers(request.headers)
         reqHeaders.set('x-pathname', pathname)
         return NextResponse.next({ request: { headers: reqHeaders } })
