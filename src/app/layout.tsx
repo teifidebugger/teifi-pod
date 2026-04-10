@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-    title: "Teifi Tracking Portal | Teifi Digital Inc",
-    description: "Projects, clients, and time tracking portal for agencies.",
+    title: "Teifi Pod Management",
+    description: "Project, client, and time management for Teifi.",
 }
 
 export default async function RootLayout({

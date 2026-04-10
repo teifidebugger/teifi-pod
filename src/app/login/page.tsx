@@ -140,7 +140,7 @@ export default function LoginPage() {
                                 className="text-[10px] font-medium tracking-widest uppercase"
                                 style={{ color: 'rgba(255,255,255,0.3)' }}
                             >
-                                Project Operations
+                                Pod Management
                             </span>
                             <div
                                 className="h-px flex-1"
