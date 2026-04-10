@@ -1,0 +1,1009 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String    @unique
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+model Workspace {
+  id                            String                        @id @default(cuid())
+  name                          String
+  createdAt                     DateTime                      @default(now())
+  slug                          String                        @unique
+  updatedAt                     DateTime                      @updatedAt
+  currency                      String                        @default("USD")
+  timeFormat                    String                        @default("decimal")
+  weekStartDay                  Int                           @default(1)
+  projectColorLabels            Json                          @default("[]")
+  defaultCapacityHours          Float                         @default(40)
+  requireTimeEntryNotes         Boolean                       @default(false)
+  timeRounding                  Int                           @default(0)
+  timerMode                     String                        @default("duration")
+  reminderDays                  String                        @default("1,2,3,4,5")
+  reminderEnabled               Boolean                       @default(false)
+  reminderTime                  String                        @default("17:00")
+  /// Default allowed client transitions for UAT portal. Partial<Record<UATColumn, UATColumn[]>> — null = use hard-coded constant.
+  portalDefaultTransitions      Json?
+  /// Default state-type → UAT column mapping. Partial<Record<LinearStateType, UATColumn | null>> — null = use heuristic.
+  portalDefaultStateTypeMapping Json?
+  hiddenNavItems                String[]                      @default([])
+  /// Default allowed staff transitions for UAT portal. Partial<Record<UATColumn, UATColumn[]>> — null = all transitions allowed.
+  portalStaffDefaultTransitions Json?
+  emailFrom                     String?
+  smtpHost                      String?
+  smtpPass                      String?
+  smtpPort                      Int?
+  smtpUser                      String?
+  energyTrackingEnabled         Boolean                       @default(false)
+  onboardingEnabled             Boolean                       @default(true)
+  /// TeifiProject IDs to use as support team pools in the onboarding wizard (support template). Empty = auto-detect SUP* Linear teams.
+  supportProjectIds             String[]                      @default([])
+  /// Structured fields shown in the "Add Acceptance Issue" dialog. Array<AcceptanceIssueField> — null = use hardcoded defaults.
+  portalAcceptanceFields        Json?
+  apiTokens                     ApiToken[]
+  clients                       Client[]
+  expenseCategories             ExpenseCategory[]
+  invites                       Invite[]
+  invoices                      Invoice[]
+  linearAllocationSnapshot      LinearAllocationSnapshot?
+  linearTeams                   LinearTeam[]
+  timeOffDays                   MemberTimeOff[]
+  onboardingJobs                OnboardingJob[]
+  placeholders                  Placeholder[]
+  planScenarios                 PlanScenario[]
+  pods                          Pod[]
+  pokerSessions                 PokerSession[]
+  portalEvents                  PortalEvent[]
+  tags                          Tag[]
+  projects                      TeifiProject[]
+  timesheetWeeks                TimesheetWeek[]
+  uatStateMappings              UatStateMapping[]
+  acceptanceTemplates           WorkspaceAcceptanceTemplate[]
+  holidays                      WorkspaceHoliday[]
+  members                       WorkspaceMember[]
+  workspaceRoles                WorkspaceRole[]
+}
+
+model WorkspaceAcceptanceTemplate {
+  id           String               @id @default(cuid())
+  workspaceId  String
+  name         String
+  /// "acceptance" | "bug" | "feature"
+  templateType String               @default("acceptance")
+  /// Array<AcceptanceIssueField> — [{id, label, placeholder?, required}]
+  fields       Json
+  /// Only one template per workspace can be default per templateType.
+  isDefault    Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  teamSettings ClientTeamSettings[]
+  workspace    Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name, templateType])
+  @@index([workspaceId])
+  @@index([workspaceId, templateType])
+}
+
+model User {
+  id                   String             @id @default(cuid())
+  name                 String?
+  email                String             @unique
+  costRateCents        Int                @default(0)
+  defaultBillableCents Int                @default(0)
+  createdAt            DateTime           @default(now())
+  image                String?
+  updatedAt            DateTime           @updatedAt
+  emailVerified        Boolean            @default(false)
+  accounts             Account[]
+  apiTokens            ApiToken[]
+  expenses             Expense[]          @relation("UserExpenses")
+  linearTokens         LinearUserToken[]
+  portalProfile        PortalProfile?
+  sessions             Session[]
+  approvedEntries      TimeEntry[]        @relation("TimeEntryApprovals")
+  timeEntries          TimeEntry[]
+  auditedEntries       TimeEntryHistory[] @relation("TimeEntryAudit")
+  reviewedWeeks        TimesheetWeek[]    @relation("TimesheetWeekReviewer")
+  timesheetWeeks       TimesheetWeek[]    @relation("TimesheetWeekOwner")
+  memberships          WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id                    String             @id @default(cuid())
+  userId                String
+  workspaceId           String
+  role                  Role               @default(MEMBER)
+  joinedAt              DateTime           @default(now())
+  managerId             String?
+  title                 String?
+  weeklyCapacityHours   Float              @default(40)
+  canEditOthersTime     Boolean            @default(false)
+  canManageProjects     Boolean            @default(false)
+  canSeeRates           Boolean            @default(false)
+  teamName              String?
+  employeeId            String?
+  timezone              String?            @default("UTC")
+  roles                 String[]
+  autoAssignAllProjects Boolean            @default(false)
+  canEditClients        Boolean            @default(false)
+  canWithdrawApprovals  Boolean            @default(false)
+  disabledAt            DateTime?
+  allocations           Allocation[]
+  timeOff               MemberTimeOff[]
+  planScenarios         PlanScenario[]
+  podSlots              PodSlot[]
+  participations        PokerParticipant[]
+  hostedSessions        PokerSession[]     @relation("PokerSessionCreator")
+  projectMembers        ProjectMember[]
+  managedProjects       TeifiProject[]     @relation("ProjectManager")
+  manager               WorkspaceMember?   @relation("MemberReports", fields: [managerId], references: [id])
+  reports               WorkspaceMember[]  @relation("MemberReports")
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace             Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+model Client {
+  id                   String               @id @default(cuid())
+  name                 String
+  workspaceId          String
+  createdAt            DateTime             @default(now())
+  email                String?
+  updatedAt            DateTime             @updatedAt
+  website              String?
+  archivedAt           DateTime?
+  /// Linear label IDs designated as UAT modules (test categories).
+  /// These labels structure the Acceptance view — each label becomes a module group.
+  /// Labels can be top-level (module) or have children (sub-modules) via Linear's label hierarchy.
+  portalModuleLabelIds String[]
+  /// Linear label IDs used to gate which issues appear on the UAT portal.
+  /// An issue is shown if it carries ANY of these labels.
+  /// When empty, only issues in explicitly UAT-named states are shown.
+  uatLabelIds          String[]
+  /// Linear project IDs used to narrow portal issues to specific projects.
+  /// When non-empty, only issues belonging to any of these projects appear on the portal.
+  uatProjectIds        String[]
+  workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contacts             ClientContact[]
+  clientTeamSettings   ClientTeamSettings[]
+  invoices             Invoice[]
+  announcements        PortalAnnouncement[]
+  portalEvents         PortalEvent[]
+  portalInvites        PortalInvite[]
+  portalIssueLogs      PortalIssueLog[]
+  portalProfiles       PortalProfile[]
+  projects             TeifiProject[]
+  linearTeams          LinearTeam[]         @relation("ClientLinearTeams")
+
+  @@index([workspaceId])
+}
+
+/// Per-team UAT portal settings for a client.
+/// Each linked Linear team can have its own label gate, project filter, and module labels.
+model ClientTeamSettings {
+  id                      String                       @id @default(cuid())
+  clientId                String
+  linearTeamId            String
+  /// Linear label IDs designated as UAT modules (test categories) for this team.
+  portalModuleLabelIds    String[]
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+  /// Linear label IDs for gating which issues appear on the portal for this team.
+  /// An issue is shown if it carries ANY of these labels.
+  uatLabelIds             String[]
+  /// Allowed client transitions between UAT columns. Partial<Record<UATColumn, UATColumn[]>> — null = use default.
+  allowedTransitions      Json?
+  /// Linear state ID to move to when a client clicks "Approve". null = use heuristic (findStateForUATColumn "done").
+  approveStateId          String?
+  /// Linear state ID to move to when a client clicks "Reject". null = use heuristic (findStateForUATColumn "archived").
+  rejectStateId           String?
+  /// Allowed staff transitions between UAT columns. Partial<Record<UATColumn, UATColumn[]>> — null = use workspace default (all allowed).
+  staffAllowedTransitions Json?
+  /// Linear project IDs for filtering portal issues to specific projects.
+  uatProjectIds           String[]
+  /// Acceptance issue form fields for this team. Array<AcceptanceIssueField> — null = use workspace default.
+  portalAcceptanceFields  Json?
+  /// Selected acceptance issue template for this team. null = use workspace default template.
+  acceptanceTemplateId    String?
+  acceptanceTemplate      WorkspaceAcceptanceTemplate? @relation(fields: [acceptanceTemplateId], references: [id])
+  client                  Client                       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  linearTeam              LinearTeam                   @relation(fields: [linearTeamId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, linearTeamId])
+  @@index([clientId])
+}
+
+model ClientContact {
+  id        String   @id @default(cuid())
+  clientId  String
+  firstName String
+  lastName  String?
+  title     String?
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+model TeifiProject {
+  id                            String           @id @default(cuid())
+  name                          String
+  clientId                      String?
+  billingType                   BillingType      @default(HOURLY)
+  budgetCents                   Int?
+  budgetHours                   Int?
+  createdAt                     DateTime         @default(now())
+  description                   String?
+  linearTeamId                  String?
+  status                        ProjectStatus    @default(ACTIVE)
+  updatedAt                     DateTime         @updatedAt
+  workspaceId                   String
+  hourlyRateCents               Int?
+  budgetBy                      String           @default("project_hours")
+  costBudgetCents               Int?
+  costBudgetIncludeExpenses     Boolean          @default(false)
+  feeCents                      Int?
+  notifyWhenOverBudget          Boolean          @default(false)
+  overBudgetNotificationPercent Float            @default(80)
+  color                         String           @default("orange")
+  budgetIsMonthly               Boolean          @default(false)
+  code                          String?
+  endsOn                        DateTime?
+  managerId                     String?
+  showBudgetToAll               Boolean          @default(false)
+  startsOn                      DateTime?
+  podId                         String?
+  linearProjectId               String?
+  linearProjectName             String?
+  lastBudgetAlertSentAt         DateTime?
+  billBy                        BillBy           @default(People)
+  allocations                   Allocation[]
+  expenses                      Expense[]
+  pokerSessions                 PokerSession[]
+  projectMembers                ProjectMember[]
+  client                        Client?          @relation(fields: [clientId], references: [id])
+  linearTeam                    LinearTeam?      @relation(fields: [linearTeamId], references: [id])
+  manager                       WorkspaceMember? @relation("ProjectManager", fields: [managerId], references: [id])
+  pod                           Pod?             @relation(fields: [podId], references: [id])
+  workspace                     Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks                         TeifiTask[]
+  timeEntries                   TimeEntry[]
+
+  @@index([workspaceId])
+  @@index([linearTeamId])
+}
+
+/// Managed expense categories (per workspace)
+model ExpenseCategory {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  name           String
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  unitName       String?
+  unitPriceCents Int?
+  expenses       Expense[]
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+}
+
+/// Expense entry — tracked cost against a project
+model Expense {
+  id                String           @id @default(cuid())
+  userId            String
+  projectId         String
+  date              DateTime
+  amountCents       Int
+  description       String
+  isBillable        Boolean          @default(true)
+  notes             String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  expenseCategoryId String?
+  isLocked          Boolean          @default(false)
+  lockedReason      String?
+  quantity          Float?
+  receiptUrl        String?
+  expenseCategory   ExpenseCategory? @relation(fields: [expenseCategoryId], references: [id])
+  project           TeifiProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user              User             @relation("UserExpenses", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+}
+
+/// Planned resource allocation — who is scheduled on a project for a date range
+/// Exactly one of memberId / placeholderId must be set (app-layer validation)
+model Allocation {
+  id            String           @id @default(cuid())
+  memberId      String?
+  projectId     String
+  startDate     DateTime
+  endDate       DateTime
+  hoursPerDay   Float            @default(8)
+  type          AllocationType   @default(SOFT)
+  notes         String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  placeholderId String?
+  member        WorkspaceMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  placeholder   Placeholder?     @relation(fields: [placeholderId], references: [id], onDelete: Cascade)
+  project       TeifiProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([memberId])
+  @@index([projectId])
+  @@index([startDate, endDate])
+}
+
+/// Project membership — who is assigned to a project + optional per-person rate override
+model ProjectMember {
+  id                String          @id @default(cuid())
+  projectId         String
+  memberId          String
+  billableRateCents Int?
+  assignedAt        DateTime        @default(now())
+  isProjectManager  Boolean         @default(false)
+  member            WorkspaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  project           TeifiProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, memberId])
+}
+
+model TeifiTask {
+  id              String       @id @default(cuid())
+  name            String
+  completed       Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  description     String?
+  linearIssueId   String?      @unique
+  projectId       String
+  updatedAt       DateTime     @updatedAt
+  hourlyRateCents Int?
+  isBillable      Boolean      @default(true)
+  estimatedHours  Float?
+  storyPoints     Int?
+  pokerRounds     PokerRound[]
+  linearIssue     LinearIssue? @relation(fields: [linearIssueId], references: [id])
+  project         TeifiProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  timeEntries     TimeEntry[]
+
+  @@index([projectId])
+}
+
+model TimeEntry {
+  id                String             @id @default(cuid())
+  userId            String
+  durationSeconds   Int                @default(0)
+  isBillable        Boolean            @default(true)
+  billableRateCents Int                @default(0)
+  invoiceId         String?
+  createdAt         DateTime           @default(now())
+  description       String?
+  projectId         String
+  taskId            String?
+  updatedAt         DateTime           @updatedAt
+  approvalStatus    ApprovalStatus     @default(PENDING)
+  approvedAt        DateTime?
+  approvedById      String?
+  costRateCents     Int                @default(0)
+  isLocked          Boolean            @default(false)
+  lockedReason      String?
+  date              String
+  timerStartedAt    DateTime?
+  energyLevel       Int?
+  approvedBy        User?              @relation("TimeEntryApprovals", fields: [approvedById], references: [id])
+  invoice           Invoice?           @relation(fields: [invoiceId], references: [id])
+  project           TeifiProject       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task              TeifiTask?         @relation(fields: [taskId], references: [id])
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history           TimeEntryHistory[]
+  tags              Tag[]              @relation("TimeEntryTags")
+
+  @@index([userId, date])
+  @@index([projectId, date])
+  @@index([projectId, timerStartedAt])
+  @@index([date])
+}
+
+model TimeEntryHistory {
+  id          String    @id @default(cuid())
+  timeEntryId String
+  changedById String
+  action      String
+  fieldName   String?
+  oldValue    String?
+  newValue    String?
+  changedAt   DateTime  @default(now())
+  changedBy   User      @relation("TimeEntryAudit", fields: [changedById], references: [id], onDelete: Cascade)
+  timeEntry   TimeEntry @relation(fields: [timeEntryId], references: [id], onDelete: Cascade)
+}
+
+model Tag {
+  id          String      @id @default(cuid())
+  name        String
+  color       String?
+  workspaceId String
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  timeEntries TimeEntry[] @relation("TimeEntryTags")
+}
+
+model Invoice {
+  id             String            @id @default(cuid())
+  invoiceNum     String            @unique
+  createdAt      DateTime          @default(now())
+  dueAt          DateTime?
+  issuedAt       DateTime?
+  noteToClient   String?
+  updatedAt      DateTime          @updatedAt
+  status         InvoiceStatus     @default(DRAFT)
+  clientId       String?
+  paidAt         DateTime?
+  subtotalCents  Int               @default(0)
+  taxCents       Int               @default(0)
+  taxRatePercent Float             @default(0)
+  totalCents     Int               @default(0)
+  workspaceId    String
+  client         Client?           @relation(fields: [clientId], references: [id])
+  workspace      Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lineItems      InvoiceLineItem[]
+  timeEntries    TimeEntry[]
+}
+
+model InvoiceLineItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Float
+  unitPrice   Int
+  totalCents  Int
+  kind        String  @default("time")
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+/// Per-user OAuth token for Linear API access
+model LinearUserToken {
+  id           String   @id @default(cuid())
+  userId       String
+  accessToken  String
+  linearUserId String
+  email        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, linearUserId])
+}
+
+/// Cached from Linear via Webhook — represents a Linear Team
+/// Auto-refreshed when Linear sends team update webhooks
+model LinearTeam {
+  id                 String               @id
+  name               String
+  key                String
+  workspaceId        String
+  syncedAt           DateTime             @default(now())
+  clientTeamSettings ClientTeamSettings[]
+  cycles             LinearCycle[]
+  issues             LinearIssue[]
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  projects           TeifiProject[]
+  uatStateMappings   UatStateMapping[]
+  clients            Client[]             @relation("ClientLinearTeams")
+}
+
+/// Cached from Linear via Webhook — represents a Linear Sprint / Cycle
+model LinearCycle {
+  id       String        @id
+  name     String?
+  number   Int
+  startsAt DateTime?
+  endsAt   DateTime?
+  teamId   String
+  syncedAt DateTime      @default(now())
+  team     LinearTeam    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  issues   LinearIssue[]
+}
+
+model Invite {
+  id          String    @id @default(cuid())
+  email       String
+  workspaceId String
+  token       String    @unique @default(cuid())
+  role        Role      @default(MEMBER)
+  createdById String
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  managerId   String?
+  projectIds  String[]  @default([])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+/// Named role slot that can be scheduled like a real team member, then later
+/// reassigned to an actual person. Soft-deleted via archivedAt.
+model Placeholder {
+  id                  String       @id @default(cuid())
+  name                String
+  roles               String[]
+  weeklyCapacityHours Float        @default(40)
+  workspaceId         String
+  archivedAt          DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  allocations         Allocation[]
+  workspace           Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+/// Fetched on-demand + cached — represents a Linear Issue
+/// Pulled from API when user links a Task. Cached to avoid repeated calls.
+model LinearIssue {
+  id         String       @id
+  identifier String
+  title      String
+  state      String
+  priority   Int          @default(0)
+  url        String
+  teamId     String
+  cycleId    String?
+  syncedAt   DateTime     @default(now())
+  cycle      LinearCycle? @relation(fields: [cycleId], references: [id])
+  team       LinearTeam   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  task       TeifiTask?
+}
+
+model WorkspaceRole {
+  id          String    @id @default(cuid())
+  name        String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([name, workspaceId])
+}
+
+/// Fixed dates the whole workspace is off (public holidays, company shutdowns)
+model WorkspaceHoliday {
+  id          String    @id @default(cuid())
+  name        String
+  date        String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([date, workspaceId])
+  @@index([workspaceId])
+}
+
+/// Individual member day off (vacation, sick leave, personal)
+model MemberTimeOff {
+  id          String          @id @default(cuid())
+  memberId    String
+  date        String
+  reason      String?
+  workspaceId String
+  createdAt   DateTime        @default(now())
+  member      WorkspaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, date])
+  @@index([workspaceId])
+  @@index([memberId])
+}
+
+/// Tracks the submission / approval lifecycle for a member's week
+model TimesheetWeek {
+  id           String               @id @default(cuid())
+  userId       String
+  workspaceId  String
+  weekStart    String
+  status       WeekSubmissionStatus @default(OPEN)
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewNote   String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  reviewedBy   User?                @relation("TimesheetWeekReviewer", fields: [reviewedById], references: [id])
+  user         User                 @relation("TimesheetWeekOwner", fields: [userId], references: [id], onDelete: Cascade)
+  workspace    Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId, weekStart])
+}
+
+model PlanScenario {
+  id          String          @id @default(cuid())
+  name        String
+  workspaceId String
+  createdById String
+  podName     String?
+  weekRange   Int             @default(12)
+  stateJson   Json
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   WorkspaceMember @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, createdById])
+}
+
+/// Personal API tokens for external integrations (Chrome extension, etc.)
+/// Raw token is shown once at creation and never stored — only SHA-256 hash stored.
+model ApiToken {
+  id          String    @id @default(cuid())
+  name        String
+  tokenHash   String    @unique
+  userId      String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+/// A Delivery or Support Pod — a stable, cross-functional team that rolls project to project.
+/// Completely isolated from the existing schedule/allocation model.
+model Pod {
+  id          String         @id @default(cuid())
+  name        String
+  type        PodType        @default(DELIVERY)
+  workspaceId String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  slots       PodSlot[]
+  projects    TeifiProject[]
+
+  @@index([workspaceId])
+}
+
+/// A role slot within a Pod. memberId = null means "To be filled" (open seat).
+model PodSlot {
+  id                String           @id @default(cuid())
+  podId             String
+  roleName          String
+  memberId          String?
+  allocationPercent Int              @default(100)
+  member            WorkspaceMember? @relation(fields: [memberId], references: [id])
+  pod               Pod              @relation(fields: [podId], references: [id], onDelete: Cascade)
+
+  @@index([podId])
+}
+
+/// Email invite for portal guest access (separate from workspace member invites).
+model PortalInvite {
+  id          String    @id @default(cuid())
+  email       String
+  clientId    String
+  token       String    @unique @default(cuid())
+  createdById String
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+/// Announcement / status update shown to portal users of a specific client.
+model PortalAnnouncement {
+  id        String    @id @default(cuid())
+  clientId  String
+  type      String    @default("info")
+  title     String
+  body      String?
+  buildId   String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+/// A portal guest account — links a User to a Client for portal access.
+/// One user can only be a portal guest for one client.
+model PortalProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  clientId  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+/// Audit log of portal issue creations — used for DB-backed rate limiting.
+/// One row per issue created via the Client UAT Portal.
+model PortalIssueLog {
+  id        String   @id @default(cuid())
+  clientId  String
+  userId    String
+  createdAt DateTime @default(now())
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+}
+
+/// Per-team override of heuristic UAT column mapping.
+/// When a record exists, its `uatColumn` value is used instead of `mapStateToUATColumn()`.
+/// `uatColumn = null` means "explicitly hidden from portal".
+/// Absent record = use the default heuristic.
+model UatStateMapping {
+  id              String     @id @default(cuid())
+  workspaceId     String
+  linearTeamId    String
+  linearStateId   String
+  linearStateName String
+  uatColumn       String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  linearTeam      LinearTeam @relation(fields: [linearTeamId], references: [id], onDelete: Cascade)
+  workspace       Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, linearTeamId, linearStateId])
+  @@index([workspaceId, linearTeamId])
+}
+
+/// An estimation poker session — a real-time meeting where the team votes on issue complexity
+model PokerSession {
+  id           String             @id @default(cuid())
+  workspaceId  String
+  name         String
+  description  String?
+  createdById  String
+  status       PokerSessionStatus @default(LOBBY)
+  deckType     String             @default("fibonacci")
+  customDeck   String[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  completedAt  DateTime?
+  projectId    String?
+  participants PokerParticipant[]
+  rounds       PokerRound[]
+  createdBy    WorkspaceMember    @relation("PokerSessionCreator", fields: [createdById], references: [id])
+  project      TeifiProject?      @relation(fields: [projectId], references: [id])
+  workspace    Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([createdById])
+  @@index([projectId])
+}
+
+/// One issue/item being estimated in a session
+model PokerRound {
+  id                    String           @id @default(cuid())
+  sessionId             String
+  linearIssueId         String?
+  linearIssueTitle      String?
+  linearIssueIdentifier String?
+  title                 String
+  position              Int
+  status                PokerRoundStatus @default(VOTING)
+  finalEstimate         String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  revealedAt            DateTime?
+  taskId                String?
+  description           String?
+  session               PokerSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  task                  TeifiTask?       @relation(fields: [taskId], references: [id])
+  votes                 PokerVote[]
+
+  @@index([sessionId])
+  @@index([taskId])
+}
+
+/// A participant in a poker session
+model PokerParticipant {
+  id         String          @id @default(cuid())
+  sessionId  String
+  memberId   String
+  isHost     Boolean         @default(false)
+  joinedAt   DateTime        @default(now())
+  isObserver Boolean         @default(false)
+  lastSeenAt DateTime        @default(now())
+  member     WorkspaceMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  session    PokerSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  votes      PokerVote[]
+
+  @@unique([sessionId, memberId])
+  @@index([sessionId])
+}
+
+/// Tracks async client onboarding wizard execution — template, step state, and result
+model OnboardingJob {
+  id          String    @id @default(cuid())
+  workspaceId String
+  template    String
+  status      String
+  steps       Json
+  result      Json?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+/// A single vote cast by a participant on a round
+model PokerVote {
+  id            String           @id @default(cuid())
+  roundId       String
+  participantId String
+  value         String
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  participant   PokerParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  round         PokerRound       @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, participantId])
+  @@index([roundId])
+}
+
+model PortalEvent {
+  id              String          @id @default(cuid())
+  workspaceId     String
+  clientId        String
+  teamId          String?
+  userId          String
+  issueId         String?
+  issueTitle      String          @default("")
+  fromColumn      String?
+  toColumn        String?
+  metadata        Json?
+  createdAt       DateTime        @default(now())
+  actorRole       String          @default("client")
+  issueIdentifier String          @default("")
+  eventType       PortalEventType
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  workspace       Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([clientId, createdAt])
+  @@index([issueId])
+  @@index([teamId, eventType, createdAt])
+}
+
+model LinearAllocationSnapshot {
+  id          String    @id @default(cuid())
+  workspaceId String    @unique
+  data        Json
+  fetchedAt   DateTime  @default(now()) @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  MEMBER
+  CONTRACTOR
+}
+
+enum AllocationType {
+  SOFT
+  HARD
+}
+
+enum ProjectStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+  TENTATIVE
+}
+
+enum BillingType {
+  HOURLY
+  FIXED_FEE
+  NON_BILLABLE
+}
+
+enum BillBy {
+  Project
+  Tasks
+  People
+  none
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  VOID
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum WeekSubmissionStatus {
+  OPEN
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+enum PodType {
+  DELIVERY
+  SUPPORT
+  SHARED_SERVICES
+}
+
+enum PokerSessionStatus {
+  LOBBY
+  ACTIVE
+  COMPLETED
+}
+
+enum PokerRoundStatus {
+  VOTING
+  REVEALED
+  COMPLETE
+}
+
+enum PortalEventType {
+  issue_created
+  issue_status_changed
+  issue_column_moved
+  issue_force_approved
+  issue_commented
+  issue_description_updated
+  issue_attachment_added
+  user_login
+  issue_viewed
+}
+
