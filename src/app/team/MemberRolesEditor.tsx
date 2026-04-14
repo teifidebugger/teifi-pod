@@ -105,7 +105,7 @@ function TagChipInput({
                     }}
                     onFocus={() => setShowSuggestions(true)}
                     onKeyDown={handleKeyDown}
-                    placeholder={value.length === 0 ? (availableRoles.length === 0 ? "No roles in catalog yet" : placeholder) : ""}
+                    placeholder={value.length === 0 ? (availableRoles.length === 0 ? "No guilds in catalog yet" : placeholder) : ""}
                 />
             </div>
             {showSuggestions && filteredSuggestions.length > 0 && (
@@ -153,10 +153,10 @@ export function MemberRolesEditor({
         startTransition(async () => {
             try {
                 await updateMemberRoles(memberId, roles)
-                toast.success("Roles updated")
+                toast.success("Guilds updated")
                 setDialogOpen(false)
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Failed to update roles")
+                toast.error(err instanceof Error ? err.message : "Failed to update guilds")
             }
         })
     }
@@ -170,24 +170,24 @@ export function MemberRolesEditor({
                 onClick={handleOpen}
             >
                 <Pencil className="h-3 w-3 mr-1" />
-                Edit roles
+                Edit guilds
             </Button>
 
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Edit Member Roles</DialogTitle>
+                        <DialogTitle>Edit Member Guilds</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-2 py-2">
                         <TagChipInput
                             value={roles}
                             onChange={setRoles}
                             availableRoles={availableRoles}
-                            placeholder="Type a role and press Enter..."
+                            placeholder="Type a guild and press Enter..."
                         />
                         <p className="text-xs text-muted-foreground">
-                            Select from the workspace role catalog. Manage roles at{" "}
-                            <a href="/schedule/roles" className="underline hover:text-foreground">Schedule &rsaquo; Roles</a>.
+                            Select from the workspace guild catalog. Manage guilds at{" "}
+                            <a href="/schedule/roles" className="underline hover:text-foreground">Schedule &rsaquo; Guilds</a>.
                         </p>
                     </div>
                     <DialogFooter>

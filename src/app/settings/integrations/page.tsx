@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, Link2, Link2Off, RefreshCw, AlertTriangle, Info } from 'lucide-react'
 import { BulkLinearMapping } from './BulkLinearMapping'
+import { HarvestImport } from './HarvestImport'
+import { ForecastImport } from './ForecastImport'
 import { decryptToken } from '@/lib/linear'
 
 export default async function IntegrationsPage({
@@ -17,9 +19,21 @@ export default async function IntegrationsPage({
     if (!session) redirect('/login')
 
     const params = await searchParams
-    const linearToken = await prisma.linearUserToken.findFirst({
+
+    const member = await prisma.workspaceMember.findFirst({
         where: { userId: session.user.id },
+        select: { workspaceId: true },
     })
+
+    const [linearToken, harvestToken, forecastToken] = await Promise.all([
+        prisma.linearUserToken.findFirst({ where: { userId: session.user.id } }),
+        member
+            ? prisma.harvestToken.findFirst({ where: { userId: session.user.id, workspaceId: member.workspaceId } })
+            : Promise.resolve(null),
+        member
+            ? prisma.forecastToken.findFirst({ where: { userId: session.user.id, workspaceId: member.workspaceId } })
+            : Promise.resolve(null),
+    ])
 
     // Validate token is still active (not just present in DB)
     let isConnected = false
@@ -150,6 +164,53 @@ export default async function IntegrationsPage({
 
             {/* Bulk Linear Team Mapping (only when connected) */}
             {isConnected && <BulkLinearMappingCard userId={session.user.id} />}
+
+            {/* Harvest Card */}
+            <div className="rounded-lg border border-border/50 bg-card p-4">
+                <div className="flex items-center gap-2 mb-1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                        <circle cx="12" cy="12" r="12" fill="#FA5C28" />
+                        <path d="M7 12.5C7 9.46 9.46 7 12.5 7S18 9.46 18 12.5 15.54 18 12.5 18 7 15.54 7 12.5Z" fill="white" />
+                        <path d="M12.5 9v3.5l2.5 1.5" stroke="#FA5C28" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                    <h3 className="font-semibold tracking-tight">Harvest</h3>
+                    {harvestToken && (
+                        <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
+                            Connected
+                        </Badge>
+                    )}
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                    One-time import of clients, projects, users, and time entries from Harvest into teifi-pod.
+                </p>
+                <HarvestImport
+                    connected={!!harvestToken}
+                    accountName={harvestToken?.accountName ?? null}
+                />
+            </div>
+
+            {/* Forecast Card — import after Harvest so cross-links resolve correctly */}
+            <div className="rounded-lg border border-border/50 bg-card p-4">
+                <div className="flex items-center gap-2 mb-1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                        <circle cx="12" cy="12" r="12" fill="#E8563A" />
+                        <path d="M6 16l3-4 3 2 3-5 3 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <h3 className="font-semibold tracking-tight">Forecast</h3>
+                    {forecastToken && (
+                        <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
+                            Connected
+                        </Badge>
+                    )}
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
+                    One-time import of clients, projects, people, placeholders, and assignments from Forecast. Run Harvest import first — Forecast records will be cross-linked automatically.
+                </p>
+                <ForecastImport
+                    connected={!!forecastToken}
+                    accountName={forecastToken?.accountName ?? null}
+                />
+            </div>
         </div>
     )
 }

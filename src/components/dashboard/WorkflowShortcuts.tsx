@@ -1,13 +1,20 @@
 import Link from 'next/link';
-import { Clock, CalendarDays, Dices, Users, BarChart2, UserCircle } from 'lucide-react';
+import { Clock, CalendarDays, Dices, BarChart2, UserCircle, LayoutGrid, GitBranch } from 'lucide-react';
 
 const shortcuts = [
   {
-    navKey: 'time',
-    href: '/time',
-    icon: Clock,
-    label: 'Log Time',
-    description: 'Track hours, manage timers, submit timesheets',
+    navKey: 'planning',
+    href: '/planning',
+    icon: LayoutGrid,
+    label: 'Pods',
+    description: 'Manage POD structure, assign members and projects',
+  },
+  {
+    navKey: 'linear-allocation',
+    href: '/reports/linear?tab=workload',
+    icon: GitBranch,
+    label: 'Workload',
+    description: 'See what each POD member is working on in Linear',
   },
   {
     navKey: 'schedule',
@@ -17,18 +24,11 @@ const shortcuts = [
     description: 'Allocate team capacity and visualise the Gantt',
   },
   {
-    navKey: 'estimation',
-    href: '/estimation',
-    icon: Dices,
-    label: 'Estimation',
-    description: 'Plan poker sessions with your team',
-  },
-  {
-    navKey: null,
-    href: '/portal',
-    icon: Users,
-    label: 'Client Portal',
-    description: 'Review UAT feedback and manage client issues',
+    navKey: 'team-overview',
+    href: '/team',
+    icon: UserCircle,
+    label: 'Members',
+    description: 'Manage members, guilds, rates and permissions',
   },
   {
     navKey: 'reports',
@@ -38,11 +38,18 @@ const shortcuts = [
     description: 'Analyse time, budgets, utilisation and expenses',
   },
   {
-    navKey: 'team-overview',
-    href: '/team',
-    icon: UserCircle,
-    label: 'Team',
-    description: 'Manage members, roles, rates and permissions',
+    navKey: 'time',
+    href: '/time',
+    icon: Clock,
+    label: 'Log Time',
+    description: 'Track hours, manage timers, submit timesheets',
+  },
+  {
+    navKey: 'estimation',
+    href: '/estimation',
+    icon: Dices,
+    label: 'Estimation',
+    description: 'Plan poker sessions with your team',
   },
 ];
 

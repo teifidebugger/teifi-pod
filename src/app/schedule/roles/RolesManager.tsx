@@ -36,16 +36,16 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
     function handleCreate(e: React.FormEvent) {
         e.preventDefault()
         if (!newRoleName.trim()) {
-            toast.error("Role name is required")
+            toast.error("Guild name is required")
             return
         }
         startCreateTransition(async () => {
             try {
                 await createWorkspaceRole(newRoleName.trim())
-                toast.success(`Role "${newRoleName.trim()}" created`)
+                toast.success(`Guild "${newRoleName.trim()}" created`)
                 setNewRoleName("")
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Failed to create role")
+                toast.error(err instanceof Error ? err.message : "Failed to create guild")
             }
         })
     }
@@ -55,10 +55,10 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
         startDeleteTransition(async () => {
             try {
                 await deleteWorkspaceRole(deletingRole.id)
-                toast.success(`Role "${deletingRole.name}" deleted`)
+                toast.success(`Guild "${deletingRole.name}" deleted`)
                 setDeletingRole(null)
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Failed to delete role")
+                toast.error(err instanceof Error ? err.message : "Failed to delete guild")
             }
         })
     }
@@ -75,13 +75,13 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
                             <Tags className="h-4 w-4" />
-                            Role Catalog
+                            Guild Catalog
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         {roles.length === 0 ? (
                             <p className="text-sm text-muted-foreground py-4 text-center">
-                                No roles defined yet. Add one to get started.
+                                No guilds defined yet. Add one to get started.
                             </p>
                         ) : (
                             <div className="space-y-2">
@@ -98,7 +98,7 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
                                                 {role.name}
                                             </Badge>
                                             <span className="text-xs text-muted-foreground">
-                                                {role.memberCount} member{role.memberCount !== 1 ? "s" : ""}, {role.placeholderCount} placeholder{role.placeholderCount !== 1 ? "s" : ""}
+                                                {role.memberCount} member{role.memberCount !== 1 ? "s" : ""}, {role.placeholderCount} pool member{role.placeholderCount !== 1 ? "s" : ""}
                                             </span>
                                         </div>
                                         <Button
@@ -121,13 +121,13 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
                             <Plus className="h-4 w-4" />
-                            Add Role
+                            Add Guild
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleCreate} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="role-name">Role Name</Label>
+                                <Label htmlFor="role-name">Guild Name</Label>
                                 <Input
                                     id="role-name"
                                     placeholder='e.g. "Backend", "Designer", "QA"'
@@ -137,12 +137,12 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
                                     autoFocus
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Roles are shared across team members and placeholders for skill-based resourcing.
+                                    Guilds are shared across team members and placeholders for skill-based resourcing.
                                 </p>
                             </div>
                             <Button type="submit" disabled={isCreating}>
                                 <Plus className="h-4 w-4 mr-1" />
-                                {isCreating ? "Adding..." : "Add Role"}
+                                {isCreating ? "Adding..." : "Add Guild"}
                             </Button>
                         </form>
                     </CardContent>
@@ -153,7 +153,7 @@ export function RolesManager({ roles }: { roles: RoleWithUsage[] }) {
             <AlertDialog open={!!deletingRole} onOpenChange={(open) => { if (!open) setDeletingRole(null) }}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete role?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete guild?</AlertDialogTitle>
                         <AlertDialogDescription>
                             This will remove &ldquo;{deletingRole?.name}&rdquo; from all members and placeholders &mdash; {totalAffected} {totalAffected === 1 ? "person" : "people"} affected.
                         </AlertDialogDescription>

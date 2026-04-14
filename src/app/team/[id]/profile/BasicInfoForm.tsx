@@ -381,10 +381,10 @@ export function BasicInfoForm({
             {/* Roles & skills */}
             <div className="space-y-4">
                 <div>
-                    <h3 className="text-sm font-semibold text-foreground">Skills &amp; roles</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Skills &amp; guilds</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                        Select from the workspace role catalog.{" "}
-                        <a href="/schedule/roles" className="underline hover:text-foreground">Manage roles</a>.
+                        Select from the workspace guild catalog.{" "}
+                        <a href="/schedule/roles" className="underline hover:text-foreground">Manage guilds</a>.
                     </p>
                 </div>
                 <div className="space-y-1.5">
@@ -421,7 +421,7 @@ export function BasicInfoForm({
                                     onChange={(e) => { setRoleInput(e.target.value); setShowRoleSuggestions(true) }}
                                     onFocus={() => setShowRoleSuggestions(true)}
                                     onKeyDown={handleRoleKeyDown}
-                                    placeholder={selectedRoles.length === 0 ? (availableRoles.length === 0 ? "No roles in catalog yet" : "Type to search roles...") : ""}
+                                    placeholder={selectedRoles.length === 0 ? (availableRoles.length === 0 ? "No guilds in catalog yet" : "Type to search guilds...") : ""}
                                 />
                             )}
                         </div>

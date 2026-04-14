@@ -259,7 +259,7 @@ function PlaceholderCard({
                 setAssignDialogOpen(false)
                 setSelectedMemberId("")
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Failed to convert placeholder")
+                toast.error(err instanceof Error ? err.message : "Failed to convert Placeholder")
             }
         })
     }
@@ -512,12 +512,12 @@ function PlaceholderFormDialog({ open, onOpenChange, editingPlaceholder, availab
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Roles</Label>
+                        <Label>Guilds</Label>
                         <TagChipInput
                             value={roles}
                             onChange={setRoles}
                             availableRoles={availableRoles}
-                            placeholder='Type a role and press Enter...'
+                            placeholder='Type a guild and press Enter...'
                         />
                         <p className="text-xs text-muted-foreground">
                             Skill tags to help identify what kind of person this slot needs.
@@ -543,7 +543,7 @@ function PlaceholderFormDialog({ open, onOpenChange, editingPlaceholder, availab
                         </Button>
                         <Button type="submit" disabled={isPending}>
                             {isPending && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-                            {isPending ? "Saving..." : isEditing ? "Save Changes" : "Create Placeholder"}
+                            {isPending ? "Saving..." : isEditing ? "Save Changes" : "Create Member"}
                         </Button>
                     </DialogFooter>
                 </form>
@@ -598,13 +598,13 @@ export function PlaceholderList({ placeholders, availableRoles, members }: Place
             {displayed.length === 0 ? (
                 <div className="rounded-xl border border-sidebar-border bg-sidebar/30 p-12 text-center">
                     <HelpCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No placeholders yet</h3>
+                    <h3 className="text-lg font-semibold mb-2">No Placeholders yet</h3>
                     <p className="text-muted-foreground text-sm max-w-md mx-auto mb-4">
-                        Placeholders are named role slots (like &quot;Backend Dev 2&quot; or &quot;Design Lead&quot;) that can be scheduled on the timeline, then later reassigned to real team members.
+                        Placeholders are unfilled team member slots (e.g. &quot;Backend Dev 2&quot; or &quot;Design Lead&quot;) — schedule capacity before the real person is hired or assigned.
                     </p>
                     <Button onClick={() => { setEditingPlaceholder(null); setFormOpen(true) }}>
                         <Plus className="h-4 w-4 mr-1" />
-                        Create Your First Placeholder
+                        Add First Placeholder
                     </Button>
                 </div>
             ) : (

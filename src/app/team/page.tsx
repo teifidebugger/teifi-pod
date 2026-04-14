@@ -340,7 +340,7 @@ export default async function TeamPage({
                                 </div>
                             )}
                         </div>
-                        <p className="text-muted-foreground">Roles, permissions, and reporting structure.</p>
+                        <p className="text-muted-foreground">Guilds, permissions, and reporting structure.</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <SyncFromLinearButton />

@@ -103,6 +103,8 @@ model Workspace {
   holidays                      WorkspaceHoliday[]
   members                       WorkspaceMember[]
   workspaceRoles                WorkspaceRole[]
+  harvestTokens                 HarvestToken[]
+  forecastTokens                ForecastToken[]
 }
 
 model WorkspaceAcceptanceTemplate {
@@ -147,6 +149,8 @@ model User {
   reviewedWeeks        TimesheetWeek[]    @relation("TimesheetWeekReviewer")
   timesheetWeeks       TimesheetWeek[]    @relation("TimesheetWeekOwner")
   memberships          WorkspaceMember[]
+  harvestTokens        HarvestToken[]
+  forecastTokens       ForecastToken[]
 }
 
 model WorkspaceMember {
@@ -182,7 +186,12 @@ model WorkspaceMember {
   user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace             Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  harvestId             Int?
+  forecastId            Int?
+
   @@unique([userId, workspaceId])
+  @@unique([workspaceId, harvestId])
+  @@unique([workspaceId, forecastId])
   @@index([workspaceId])
 }
 
@@ -206,6 +215,8 @@ model Client {
   /// Linear project IDs used to narrow portal issues to specific projects.
   /// When non-empty, only issues belonging to any of these projects appear on the portal.
   uatProjectIds        String[]
+  harvestId            Int?
+  forecastId           Int?
   workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contacts             ClientContact[]
   clientTeamSettings   ClientTeamSettings[]
@@ -219,6 +230,8 @@ model Client {
   linearTeams          LinearTeam[]         @relation("ClientLinearTeams")
 
   @@index([workspaceId])
+  @@unique([workspaceId, harvestId])
+  @@unique([workspaceId, forecastId])
 }
 
 /// Per-team UAT portal settings for a client.
@@ -314,9 +327,13 @@ model TeifiProject {
   workspace                     Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   tasks                         TeifiTask[]
   timeEntries                   TimeEntry[]
+  harvestId                     Int?
+  forecastId                    Int?
 
   @@index([workspaceId])
   @@index([linearTeamId])
+  @@unique([workspaceId, harvestId])
+  @@unique([workspaceId, forecastId])
 }
 
 /// Managed expense categories (per workspace)
@@ -410,12 +427,14 @@ model TeifiTask {
   isBillable      Boolean      @default(true)
   estimatedHours  Float?
   storyPoints     Int?
+  harvestId       Int?
   pokerRounds     PokerRound[]
   linearIssue     LinearIssue? @relation(fields: [linearIssueId], references: [id])
   project         TeifiProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
   timeEntries     TimeEntry[]
 
   @@index([projectId])
+  @@unique([projectId, harvestId])
 }
 
 model TimeEntry {
@@ -442,6 +461,7 @@ model TimeEntry {
   approvedBy        User?              @relation("TimeEntryApprovals", fields: [approvedById], references: [id])
   invoice           Invoice?           @relation(fields: [invoiceId], references: [id])
   project           TeifiProject       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  harvestId         Int?
   task              TeifiTask?         @relation(fields: [taskId], references: [id])
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   history           TimeEntryHistory[]
@@ -451,6 +471,7 @@ model TimeEntry {
   @@index([projectId, date])
   @@index([projectId, timerStartedAt])
   @@index([date])
+  @@unique([projectId, harvestId])
 }
 
 model TimeEntryHistory {
@@ -578,8 +599,11 @@ model Placeholder {
   archivedAt          DateTime?
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
+  forecastId          Int?
   allocations         Allocation[]
   workspace           Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, forecastId])
 }
 
 /// Fetched on-demand + cached — represents a Linear Issue
@@ -981,6 +1005,38 @@ enum PodType {
   DELIVERY
   SUPPORT
   SHARED_SERVICES
+}
+
+/// Stored Harvest Personal Access Token per user (encrypted at rest)
+model HarvestToken {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  token       String
+  accountId   String
+  accountName String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+/// Stored Forecast Personal Access Token per user (encrypted at rest)
+model ForecastToken {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  token       String
+  accountId   String
+  accountName String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
 }
 
 enum PokerSessionStatus {

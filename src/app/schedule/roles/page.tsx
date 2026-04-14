@@ -53,9 +53,9 @@ export default async function RolesPage() {
                     </Link>
                 </Button>
                 <div>
-                    <h2 className="text-xl font-semibold tracking-tight">Roles</h2>
+                    <h2 className="text-xl font-semibold tracking-tight">Guilds</h2>
                     <p className="text-muted-foreground mt-1">
-                        Manage the centralized skill and department role catalog. Roles can be assigned to team members and placeholders.
+                        Manage the centralized skill and department guild catalog. Guilds can be assigned to team members and placeholders.
                     </p>
                 </div>
             </div>

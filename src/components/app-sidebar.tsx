@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
-import { Clock, LayoutDashboard, Users, Briefcase, CalendarDays, Settings, ClipboardCheck, BarChart2, Users2, Gauge, SlidersHorizontal, ListChecks, CalendarOff, Tags, UserCircle, LogOut, ChevronsUpDown, Key, UserSquare2, LayoutGrid, Shield, ChevronRight, Mail, Pin, Dices, Zap, GitBranch } from "lucide-react"
+import { Clock, Users, Briefcase, CalendarDays, Settings, ClipboardCheck, BarChart2, Users2, Gauge, SlidersHorizontal, ListChecks, CalendarOff, Tags, LogOut, ChevronsUpDown, Key, UserSquare2, LayoutGrid, Shield, ChevronRight, Mail, Pin, Dices, Zap, GitBranch, LayoutDashboard, UserCircle } from "lucide-react"
 import { signOut } from "@/lib/auth-client"
 import { avatarBg } from "@/lib/avatar-color"
 import {
@@ -52,28 +52,22 @@ type NavItem = {
 
 const groups: { label: string; items: NavItem[] }[] = [
     {
-        label: "Work",
-        items: [
-            { key: "time", title: "Time Tracking", url: "/time", icon: Clock, exact: true },
-            { key: "approvals", title: "Approvals", url: "/time/approvals", icon: ClipboardCheck, minRole: "MANAGER" },
-        ],
-    },
-    {
         label: "Delivery",
         items: [
+            { key: "planning", title: "Pods", url: "/planning", icon: LayoutGrid, minRole: "MANAGER" },
+            { key: "schedule", title: "Schedule", url: "/schedule", icon: CalendarDays },
+            { key: "linear-allocation", title: "Workload", url: "/reports/linear", icon: GitBranch, minRole: "MEMBER" },
             { key: "projects", title: "Projects", url: "/projects", icon: Briefcase },
             { key: "tasks", title: "Task Groups", url: "/tasks", icon: ListChecks },
-            { key: "planning", title: "Planning", url: "/planning", icon: LayoutGrid, minRole: "MANAGER" },
-            { key: "schedule", title: "Schedule", url: "/schedule", icon: CalendarDays },
             { key: "estimation", title: "Estimation", url: "/estimation", icon: Dices },
         ],
     },
     {
-        label: "Resources",
+        label: "People",
         items: [
             { key: "team-overview", title: "Members", url: "/team", icon: Users2, minRole: "MANAGER" },
-            { key: "roles", title: "Roles", url: "/schedule/roles", icon: Tags, minRole: "ADMIN" },
             { key: "placeholders", title: "Placeholders", url: "/schedule/placeholders", icon: UserSquare2, minRole: "MANAGER" },
+            { key: "roles", title: "Guilds", url: "/schedule/roles", icon: Tags, minRole: "ADMIN" },
             { key: "holidays", title: "Holidays & Time Off", url: "/schedule/holidays", icon: CalendarOff, minRole: "MANAGER" },
         ],
     },
@@ -85,12 +79,13 @@ const groups: { label: string; items: NavItem[] }[] = [
         ],
     },
     {
-        label: "Reports",
+        label: "Finance & Time",
         items: [
+            { key: "time", title: "Time Tracking", url: "/time", icon: Clock, exact: true },
+            { key: "approvals", title: "Approvals", url: "/time/approvals", icon: ClipboardCheck, minRole: "MANAGER" },
             { key: "reports", title: "Time Report", url: "/reports", icon: BarChart2, exact: true },
             { key: "utilization", title: "Utilization", url: "/reports/utilization", icon: Users2, minRole: "MANAGER" },
             { key: "capacity", title: "Capacity", url: "/reports/capacity", icon: Gauge, minRole: "MANAGER" },
-            { key: "linear-allocation", title: "Schedule vs Linear", url: "/reports/linear", icon: GitBranch, minRole: "MEMBER" },
             { key: "portal-analytics", title: "Portal Analytics", url: "/reports/portal", icon: Shield, minRole: "MANAGER" },
         ],
     },

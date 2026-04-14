@@ -69,13 +69,13 @@ export default async function PlaceholdersPage() {
                 <div className="flex-1">
                     <h2 className="text-xl font-semibold tracking-tight">Placeholders</h2>
                     <p className="text-muted-foreground mt-1">
-                        Manage named role slots for resource planning. Placeholders can be scheduled like team members, then later reassigned.
+                        Unfilled team member slots — schedule capacity before the real person is hired or assigned.
                     </p>
                 </div>
                 <Button variant="outline" size="sm" asChild>
                     <Link href="/schedule/roles">
                         <Tags className="h-4 w-4 mr-1" />
-                        Manage Roles
+                        Manage Guilds
                     </Link>
                 </Button>
             </div>

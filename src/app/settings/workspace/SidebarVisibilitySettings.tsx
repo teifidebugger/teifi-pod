@@ -32,7 +32,7 @@ const HIDEABLE_GROUPS: { label: string; items: { key: string; title: string }[] 
         label: "Resources",
         items: [
             { key: "team-overview", title: "Members" },
-            { key: "roles", title: "Roles" },
+            { key: "roles", title: "Guilds" },
             { key: "placeholders", title: "Placeholders" },
             { key: "holidays", title: "Holidays & Time Off" },
         ],
