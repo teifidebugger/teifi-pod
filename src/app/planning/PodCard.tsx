@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { MoreHorizontal, Plus, Trash2, Pencil, X, UserPlus } from "lucide-react"
+import { MoreHorizontal, Plus, Trash2, Pencil, X, UserPlus, ExternalLink } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -45,6 +46,7 @@ export function PodCard({ pod, workspaceMembers, canManage, onUpdated, onDeleted
   const [, startTransition] = useTransition()
 
   const filledSlots = pod.slots.filter(s => s.memberId !== null)
+  const openSlots = pod.slots.length - filledSlots.length
 
   // Effective weekly capacity: sum of (allocationPercent/100 * weeklyCapacityHours) for filled slots
   const effectiveCapacityHours = filledSlots.reduce((sum, s) => {
@@ -112,14 +114,34 @@ export function PodCard({ pod, workspaceMembers, canManage, onUpdated, onDeleted
             <span className="text-[10px] text-muted-foreground">{POD_TYPE_LABELS[pod.type] ?? pod.type}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-              {filledSlots.length}/{pod.slots.length} filled
-            </Badge>
+            {pod.slots.length > 0 && (
+              openSlots > 0 ? (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  {openSlots} open
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  {filledSlots.length}/{pod.slots.length} filled
+                </Badge>
+              )
+            )}
             {hasCapacityData && (
               <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                 {effectiveCapacityHours % 1 === 0 ? effectiveCapacityHours : effectiveCapacityHours.toFixed(1)}h/wk
               </Badge>
             )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/reports/linear?tab=workload&pod=${pod.id}`}
+                  className="text-muted-foreground/40 hover:text-muted-foreground p-0.5 rounded transition-colors"
+                  aria-label="View workload"
+                >
+                  <ExternalLink className="size-3.5" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>View workload</TooltipContent>
+            </Tooltip>
             {canManage && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

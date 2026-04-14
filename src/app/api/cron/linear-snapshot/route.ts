@@ -145,6 +145,7 @@ export async function GET(req: NextRequest) {
                 isPlaceholder: false,
                 allocatedTeams: [...(memberAllocatedTeams.get(m.id) ?? [])],
                 currentWeekAllocations: memberWeekAllocs.get(m.id) ?? [],
+                podIds: [],
             }
 
             if (!linearUserId) {

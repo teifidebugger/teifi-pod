@@ -1,0 +1,511 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1000" width="1400" height="1000">
+  <defs>
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="shadow-light" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+
+    <!-- Arrowhead markers -->
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-dashed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-harvest" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#FA5C28"/>
+    </marker>
+    <marker id="arrow-forecast" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#E8563A"/>
+    </marker>
+
+    <!-- Clip paths for domain header rounded top -->
+    <clipPath id="clip-auth"><rect x="0" y="0" width="260" height="220" rx="8"/></clipPath>
+    <clipPath id="clip-people"><rect x="0" y="0" width="310" height="250" rx="8"/></clipPath>
+    <clipPath id="clip-pod"><rect x="0" y="0" width="280" height="190" rx="8"/></clipPath>
+    <clipPath id="clip-clients"><rect x="0" y="0" width="300" height="250" rx="8"/></clipPath>
+    <clipPath id="clip-schedule"><rect x="0" y="0" width="250" height="190" rx="8"/></clipPath>
+    <clipPath id="clip-integrations"><rect x="0" y="0" width="290" height="240" rx="8"/></clipPath>
+    <clipPath id="clip-time"><rect x="0" y="0" width="270" height="210" rx="8"/></clipPath>
+    <clipPath id="clip-linear"><rect x="0" y="0" width="240" height="180" rx="8"/></clipPath>
+    <clipPath id="clip-poker"><rect x="0" y="0" width="255" height="180" rx="8"/></clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="1000" fill="#1a1a2e"/>
+  <!-- Subtle grid -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff08" stroke-width="0.5"/>
+  </pattern>
+  <rect width="1400" height="1000" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="700" y="32" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#e2e8f0" letter-spacing="2">TEIFI-POD ARCHITECTURE</text>
+  <text x="700" y="50" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" fill="#64748b" letter-spacing="1">POD Management System · Entity Relationship Overview</text>
+  <line x1="500" y1="58" x2="900" y2="58" stroke="#ffffff15" stroke-width="1"/>
+
+  <!-- ============================================================ -->
+  <!-- ROW 1: External Systems (Harvest | Forecast) -->
+  <!-- ============================================================ -->
+
+  <!-- Harvest -->
+  <g transform="translate(420,70)" filter="url(#shadow)">
+    <rect width="200" height="62" rx="8" fill="#1e1e3a" stroke="#FA5C28" stroke-width="1.5"/>
+    <rect width="200" height="22" rx="0" fill="#FA5C28"/>
+    <rect width="200" height="8" rx="0" fill="#FA5C28" y="14"/>
+    <text x="100" y="15" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#fff">🌾 HARVEST</text>
+    <text x="100" y="36" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">External Time Tracking API</text>
+    <text x="100" y="51" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">clients · projects · tasks · entries</text>
+  </g>
+
+  <!-- Forecast -->
+  <g transform="translate(760,70)" filter="url(#shadow)">
+    <rect width="200" height="62" rx="8" fill="#1e1e3a" stroke="#E8563A" stroke-width="1.5"/>
+    <rect width="200" height="22" rx="0" fill="#E8563A"/>
+    <rect width="200" height="8" rx="0" fill="#E8563A" y="14"/>
+    <text x="100" y="15" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#fff">📅 FORECAST</text>
+    <text x="100" y="36" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">External Resource Planning API</text>
+    <text x="100" y="51" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">clients · projects · people · assignments</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- ROW 2: Auth/Workspace | People/Guild | POD Management -->
+  <!-- ============================================================ -->
+
+  <!-- Auth/Workspace -->
+  <g transform="translate(30,170)" filter="url(#shadow)">
+    <rect width="260" height="220" rx="8" fill="#ffffff08" stroke="#3b4fa840" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="260" height="28" fill="#3b4fa8" rx="8"/>
+    <rect width="260" height="12" fill="#3b4fa8" y="16"/>
+    <text x="130" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">🔐 Auth / Workspace</text>
+
+    <!-- Workspace entity -->
+    <rect x="10" y="38" width="240" height="78" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#93c5fd">Workspace</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name</text>
+    <text x="20" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· slug</text>
+    <text x="20" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· currency</text>
+
+    <!-- User entity -->
+    <rect x="10" y="126" width="240" height="84" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="141" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#93c5fd">User</text>
+    <text x="20" y="155" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id</text>
+    <text x="20" y="167" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· email</text>
+    <text x="20" y="179" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name</text>
+    <text x="20" y="191" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· costRateCents</text>
+  </g>
+
+  <!-- People/Guild -->
+  <g transform="translate(320,170)" filter="url(#shadow)">
+    <rect width="310" height="270" rx="8" fill="#ffffff08" stroke="#2d8a5e40" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="310" height="28" fill="#2d8a5e" rx="8"/>
+    <rect width="310" height="12" fill="#2d8a5e" y="16"/>
+    <text x="155" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">👥 People / Guild</text>
+
+    <!-- WorkspaceMember entity -->
+    <rect x="10" y="38" width="290" height="108" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#6ee7b7">WorkspaceMember</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id</text>
+    <text x="120" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· userId → User</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· workspaceId</text>
+    <text x="120" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· role: OWNER|ADMIN|MGR|MBR</text>
+    <text x="20" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· roles[] → WorkspaceRole</text>
+    <text x="20" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· weeklyCapacityHours</text>
+    <text x="20" y="115" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbbf24">· harvestId 🔗  · forecastId 🔗</text>
+    <text x="20" y="127" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94a3b8">· disabledAt?</text>
+
+    <!-- WorkspaceRole entity -->
+    <rect x="10" y="156" width="135" height="60" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="18" y="171" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#6ee7b7">WorkspaceRole</text>
+    <text x="18" y="185" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · workspaceId</text>
+    <text x="18" y="197" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name</text>
+    <text x="18" y="209" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94a3b8">(Guild)</text>
+
+    <!-- Placeholder entity -->
+    <rect x="155" y="156" width="145" height="104" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="163" y="171" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#6ee7b7">Placeholder</text>
+    <text x="163" y="185" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · name</text>
+    <text x="163" y="197" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· roles[]</text>
+    <text x="163" y="209" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· weeklyCapacityHours</text>
+    <text x="163" y="221" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbbf24">· forecastId 🔗</text>
+    <text x="163" y="233" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94a3b8">· archivedAt?</text>
+  </g>
+
+  <!-- POD Management -->
+  <g transform="translate(660,170)" filter="url(#shadow)">
+    <rect width="290" height="210" rx="8" fill="#ffffff08" stroke="#a8303040" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="290" height="28" fill="#a83030" rx="8"/>
+    <rect width="290" height="12" fill="#a83030" y="16"/>
+    <text x="145" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">🚀 POD Management</text>
+
+    <!-- Pod entity -->
+    <rect x="10" y="38" width="130" height="86" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="18" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fca5a5">Pod</text>
+    <text x="18" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id</text>
+    <text x="18" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· workspaceId</text>
+    <text x="18" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name</text>
+    <text x="18" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· type:</text>
+    <text x="18" y="115" font-family="system-ui,-apple-system,sans-serif" font-size="9.5" fill="#94a3b8">  DELIVERY|SUPPORT|SHARED</text>
+
+    <!-- PodSlot entity -->
+    <rect x="150" y="38" width="130" height="100" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="158" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fca5a5">PodSlot</text>
+    <text x="158" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id</text>
+    <text x="158" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· podId → Pod</text>
+    <text x="158" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· memberId? → Mbr</text>
+    <text x="158" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· roleName</text>
+    <text x="158" y="115" font-family="system-ui,-apple-system,sans-serif" font-size="9.5" fill="#94a3b8">  (null = open seat)</text>
+    <text x="158" y="129" font-family="system-ui,-apple-system,sans-serif" font-size="9.5" fill="#94a3b8">  (slot on pod)</text>
+
+    <!-- Label -->
+    <text x="145" y="165" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94a3b8">Teams of members organized by type</text>
+    <text x="145" y="179" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94a3b8">Projects link to PODs via podId</text>
+  </g>
+
+  <!-- Integrations (top-right) -->
+  <g transform="translate(980,150)" filter="url(#shadow)">
+    <rect width="390" height="270" rx="8" fill="#ffffff08" stroke="#a87c1a40" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="390" height="28" fill="#a87c1a" rx="8"/>
+    <rect width="390" height="12" fill="#a87c1a" y="16"/>
+    <text x="195" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">🔌 Integrations</text>
+
+    <!-- HarvestToken -->
+    <rect x="10" y="38" width="175" height="90" rx="4" fill="#ffffff10" stroke="#FA5C2840" stroke-width="1"/>
+    <text x="18" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fdba74">HarvestToken</text>
+    <text x="18" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· userId → User</text>
+    <text x="18" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· workspaceId</text>
+    <text x="18" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· token (encrypted)</text>
+    <text x="18" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· accountId</text>
+    <text x="18" y="117" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#FA5C28">→ Harvest API auth</text>
+
+    <!-- ForecastToken -->
+    <rect x="195" y="38" width="185" height="90" rx="4" fill="#ffffff10" stroke="#E8563A40" stroke-width="1"/>
+    <text x="203" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fdba74">ForecastToken</text>
+    <text x="203" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· userId → User</text>
+    <text x="203" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· workspaceId</text>
+    <text x="203" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· token (encrypted)</text>
+    <text x="203" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· accountId</text>
+    <text x="203" y="117" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#E8563A">→ Forecast API auth</text>
+
+    <!-- Harvest import flow -->
+    <rect x="10" y="140" width="175" height="118" rx="4" fill="#FA5C2812" stroke="#FA5C2840" stroke-width="1"/>
+    <text x="18" y="155" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#FA5C28">Harvest Import</text>
+    <text x="18" y="169" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">→ Client (harvestId)</text>
+    <text x="18" y="181" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">→ TeifiProject (harvestId)</text>
+    <text x="18" y="193" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">→ TeifiTask (harvestId)</text>
+    <text x="18" y="205" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">→ WorkspaceMember (harvestId)</text>
+    <text x="18" y="217" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbd0bb">→ TimeEntry (harvestId)</text>
+    <text x="18" y="250" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#FA5C2880">harvestId 🔗 = cross-link field</text>
+
+    <!-- Forecast import flow -->
+    <rect x="195" y="140" width="185" height="118" rx="4" fill="#E8563A12" stroke="#E8563A40" stroke-width="1"/>
+    <text x="203" y="155" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#E8563A">Forecast Import</text>
+    <text x="203" y="169" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">→ Client (forecastId)</text>
+    <text x="203" y="181" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">→ TeifiProject (forecastId)</text>
+    <text x="203" y="193" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">→ WorkspaceMember (forecastId)</text>
+    <text x="203" y="205" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">→ Placeholder (forecastId)</text>
+    <text x="203" y="217" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbc8bb">→ Allocation (assignments)</text>
+    <text x="203" y="232" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#E8563A80">person.harvest_user_id reconciles</text>
+    <text x="203" y="244" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#E8563A80">harvestId ↔ forecastId on Member</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- ROW 3: Clients & Projects | Schedule/Gantt -->
+  <!-- ============================================================ -->
+
+  <!-- Clients & Projects -->
+  <g transform="translate(30,460)" filter="url(#shadow)">
+    <rect width="310" height="270" rx="8" fill="#ffffff08" stroke="#c0622a40" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="310" height="28" fill="#c0622a" rx="8"/>
+    <rect width="310" height="12" fill="#c0622a" y="16"/>
+    <text x="155" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">📁 Clients &amp; Projects</text>
+
+    <!-- Client entity -->
+    <rect x="10" y="38" width="290" height="72" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fdba74">Client</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · workspaceId  · name</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbbf24">· harvestId 🔗  · forecastId 🔗</text>
+    <text x="20" y="100" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">← synced from Harvest &amp; Forecast</text>
+
+    <!-- TeifiProject entity -->
+    <rect x="10" y="120" width="290" height="96" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="135" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fdba74">TeifiProject</text>
+    <text x="20" y="149" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · workspaceId</text>
+    <text x="20" y="161" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· clientId → Client</text>
+    <text x="20" y="173" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name  · status</text>
+    <text x="20" y="185" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fca5a5">· podId? → Pod</text>
+    <text x="20" y="197" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbbf24">· harvestId 🔗  · forecastId 🔗</text>
+    <text x="20" y="208" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">  (nullable — open seat has no project)</text>
+
+    <!-- TeifiTask entity -->
+    <rect x="10" y="226" width="290" height="34" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="241" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fdba74">TeifiTask</text>
+    <text x="20" y="253" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · projectId → TeifiProject  · name  · isBillable  · harvestId 🔗</text>
+  </g>
+
+  <!-- Schedule/Gantt -->
+  <g transform="translate(370,460)" filter="url(#shadow)">
+    <rect width="270" height="210" rx="8" fill="#ffffff08" stroke="#7b4fa840" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="270" height="28" fill="#7b4fa8" rx="8"/>
+    <rect width="270" height="12" fill="#7b4fa8" y="16"/>
+    <text x="135" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">📊 Schedule / Gantt</text>
+
+    <!-- Allocation entity -->
+    <rect x="10" y="38" width="250" height="162" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#c4b5fd">Allocation</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· projectId → TeifiProject</text>
+    <text x="20" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· memberId? → WorkspaceMember</text>
+    <text x="20" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· placeholderId? → Placeholder</text>
+    <text x="20" y="115" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· startDate · endDate</text>
+    <text x="20" y="127" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· hoursPerDay</text>
+    <text x="20" y="139" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· type: SOFT | HARD</text>
+    <text x="20" y="165" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#7c3aed90">Forecast assignments → Allocation</text>
+    <text x="20" y="179" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#7c3aed90">on import (forecastId reconciled)</text>
+    <text x="20" y="192" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">Either member OR placeholder (not both)</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- ROW 4: Time Tracking | Linear | Estimation Poker -->
+  <!-- ============================================================ -->
+
+  <!-- Time Tracking -->
+  <g transform="translate(30,750)" filter="url(#shadow)">
+    <rect width="290" height="215" rx="8" fill="#ffffff08" stroke="#1a6fa840" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="290" height="28" fill="#1a6fa8" rx="8"/>
+    <rect width="290" height="12" fill="#1a6fa8" y="16"/>
+    <text x="145" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">⏱ Time Tracking</text>
+
+    <!-- TimeEntry entity -->
+    <rect x="10" y="38" width="270" height="96" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#7dd3fc">TimeEntry</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · userId → User</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· projectId → TeifiProject</text>
+    <text x="20" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· taskId? → TeifiTask</text>
+    <text x="20" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· durationSeconds  · date</text>
+    <text x="20" y="115" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#fbbf24">· harvestId 🔗</text>
+    <text x="20" y="126" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">  (synced from Harvest)</text>
+
+    <!-- TimesheetWeek entity -->
+    <rect x="10" y="144" width="270" height="62" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="159" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#7dd3fc">TimesheetWeek</text>
+    <text x="20" y="173" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · userId  · weekStart</text>
+    <text x="20" y="185" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· status: OPEN | SUBMITTED | APPROVED | REJECTED</text>
+  </g>
+
+  <!-- Linear -->
+  <g transform="translate(360,770)" filter="url(#shadow)">
+    <rect width="265" height="185" rx="8" fill="#ffffff08" stroke="#5e3ea840" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="265" height="28" fill="#5e3ea8" rx="8"/>
+    <rect width="265" height="12" fill="#5e3ea8" y="16"/>
+    <text x="132" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">📋 Linear</text>
+
+    <!-- LinearTeam entity -->
+    <rect x="10" y="38" width="245" height="60" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#a78bfa">LinearTeam</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · workspaceId</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name  · key</text>
+
+    <!-- LinearIssue entity -->
+    <rect x="10" y="108" width="245" height="68" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="123" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#a78bfa">LinearIssue</text>
+    <text x="20" y="137" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · teamId → LinearTeam</text>
+    <text x="20" y="149" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· identifier  · title</text>
+    <text x="20" y="161" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· state</text>
+  </g>
+
+  <!-- Estimation Poker -->
+  <g transform="translate(660,770)" filter="url(#shadow)">
+    <rect width="270" height="185" rx="8" fill="#ffffff08" stroke="#8a5e2d40" stroke-width="1"/>
+    <!-- Header -->
+    <rect width="270" height="28" fill="#8a5e2d" rx="8"/>
+    <rect width="270" height="12" fill="#8a5e2d" y="16"/>
+    <text x="135" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#fff">🃏 Estimation Poker</text>
+
+    <!-- PokerSession entity -->
+    <rect x="10" y="38" width="250" height="72" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="53" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#d4a76a">PokerSession</text>
+    <text x="20" y="67" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · workspaceId</text>
+    <text x="20" y="79" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· projectId? → TeifiProject</text>
+    <text x="20" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· name  · status</text>
+    <text x="20" y="103" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#64748b">  (optional project link)</text>
+
+    <!-- PokerRound entity -->
+    <rect x="10" y="120" width="250" height="56" rx="4" fill="#ffffff10" stroke="#ffffff25" stroke-width="0.5"/>
+    <text x="20" y="135" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#d4a76a">PokerRound</text>
+    <text x="20" y="149" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· id  · sessionId → PokerSession</text>
+    <text x="20" y="161" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#cbd5e1">· taskId?  · finalEstimate?</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND (bottom right) -->
+  <!-- ============================================================ -->
+  <g transform="translate(1000,730)" filter="url(#shadow-light)">
+    <rect width="370" height="225" rx="8" fill="#0d0d22" stroke="#ffffff20" stroke-width="1"/>
+    <rect width="370" height="28" fill="#1e293b" rx="8"/>
+    <rect width="370" height="12" fill="#1e293b" y="16"/>
+    <text x="185" y="19" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#e2e8f0">LEGEND</text>
+
+    <!-- FK relation -->
+    <line x1="20" y1="50" x2="80" y2="50" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+    <text x="90" y="54" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#94a3b8">Foreign key relation (FK)</text>
+
+    <!-- Soft reference -->
+    <line x1="20" y1="76" x2="80" y2="76" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-dashed)"/>
+    <text x="90" y="80" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#94a3b8">Soft reference / array link</text>
+
+    <!-- Harvest import -->
+    <line x1="20" y1="102" x2="80" y2="102" stroke="#FA5C28" stroke-width="2" marker-end="url(#arrow-harvest)"/>
+    <text x="90" y="106" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#FA5C28">Harvest import flow</text>
+
+    <!-- Forecast import -->
+    <line x1="20" y1="128" x2="80" y2="128" stroke="#E8563A" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow-forecast)"/>
+    <text x="90" y="132" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#E8563A">Forecast import flow</text>
+
+    <!-- Divider -->
+    <line x1="15" y1="145" x2="355" y2="145" stroke="#ffffff12" stroke-width="1"/>
+
+    <!-- Symbol notes -->
+    <text x="20" y="162" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#fbbf24">🔗  Cross-link field (harvestId / forecastId)</text>
+    <text x="20" y="178" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#94a3b8">?   Optional / nullable field</text>
+    <text x="20" y="194" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#94a3b8">[]  Array / many relation</text>
+    <text x="20" y="210" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#94a3b8">→   Points to referenced entity</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- RELATIONSHIP ARROWS -->
+  <!-- ============================================================ -->
+
+  <!-- 1. WorkspaceMember → User (userId) -->
+  <!-- From People box (320+10=330, 170+80=250) to Auth User box (30+260=290, 170+168=338) -->
+  <path d="M 330,265 C 310,265 310,310 290,310" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="295" y="280" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">userId</text>
+
+  <!-- 2. WorkspaceMember → Workspace -->
+  <!-- From People box down-left to Workspace in Auth -->
+  <path d="M 330,240 C 300,240 300,218 290,218" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="292" y="233" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">workspaceId</text>
+
+  <!-- 3. WorkspaceMember roles[] to WorkspaceRole dashed -->
+  <!-- Within People box: from member entity to WorkspaceRole entity -->
+  <path d="M 340,310 L 340,340 L 358,340" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-dashed)"/>
+  <text x="346" y="334" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">roles[]</text>
+
+  <!-- 4. Placeholder roles[] to WorkspaceRole dashed -->
+  <path d="M 475,340 L 420,340 L 420,356 L 370,356" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-dashed)"/>
+  <text x="416" y="352" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">roles[]</text>
+
+  <!-- 5. TeifiProject → Client -->
+  <!-- From TeifiProject in Clients box (30+20=50, 460+135=595) to Client (50, 460+74=534) -->
+  <path d="M 185,595 C 185,570 185,554 185,538" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="188" y="568" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">clientId</text>
+
+  <!-- 6. TeifiProject → Pod (podId?) -->
+  <!-- From Clients box right side (30+310=340, 460+180=640) to Pod box (660+10=670, 170+80=250) -->
+  <path d="M 340,620 C 480,620 580,340 660,230" fill="none" stroke="#fca5a5" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow-gray)"/>
+  <text x="490" y="530" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#fca5a5">podId?</text>
+
+  <!-- 7. TeifiTask → TeifiProject (within Clients domain - visual only) -->
+  <path d="M 185,695 C 185,730 185,740 185,746" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+
+  <!-- 8. Allocation → TeifiProject -->
+  <!-- From Schedule box left (370, 460+80=540) to Clients box right (340, 460+180=640) -->
+  <path d="M 370,570 C 355,570 355,600 340,600" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="342" y="582" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">projectId</text>
+
+  <!-- 9. Allocation → WorkspaceMember -->
+  <!-- From Schedule (370+130=500, 460+90=550) to People box (320+155=475, 170+270=440) -->
+  <path d="M 500,540 C 500,490 475,460 475,450" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="480" y="500" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">memberId?</text>
+
+  <!-- 10. Allocation → Placeholder -->
+  <!-- From Schedule to Placeholder in People box -->
+  <path d="M 510,558 C 510,480 545,448 545,445" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="530" y="500" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">placeholderId?</text>
+
+  <!-- 11. PodSlot → Pod (within POD box) -->
+  <path d="M 810,230 L 800,230 L 800,210 L 802,210" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="803" y="222" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">podId</text>
+
+  <!-- 12. PodSlot → WorkspaceMember -->
+  <!-- From PodSlot box (660+150=810, 170+80=250) to People box (320+155=475, 170+100=270) -->
+  <path d="M 660,250 C 630,250 640,265 630,265" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="630" y="260" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">memberId</text>
+
+  <!-- 13. TimeEntry → TeifiProject -->
+  <!-- From Time Tracking box (30+290=320, 750+67=817) to Clients box (340, 460+185=645) -->
+  <path d="M 320,817 C 350,817 350,700 340,700" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="346" y="760" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">projectId</text>
+
+  <!-- 14. TimeEntry → User -->
+  <!-- From Time Tracking (30+150=180, 750+60=810) to Auth User (30+130=160, 170+210=380) -->
+  <path d="M 120,810 C 95,810 75,700 75,390" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+  <text x="60" y="600" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">userId</text>
+
+  <!-- 15. HarvestToken → Harvest (dashed orange) -->
+  <!-- From Integrations HarvestToken (980+90=1070, 150+90=240) to Harvest box (420+100=520, 70+62=132) -->
+  <path d="M 1070,195 C 1070,155 680,148 620,132" fill="none" stroke="#FA5C28" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow-harvest)"/>
+  <text x="820" y="153" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#FA5C28">auth</text>
+
+  <!-- 16. ForecastToken → Forecast (dashed red) -->
+  <!-- From Integrations ForecastToken (980+290=1270, 150+90=240) to Forecast box (760+100=860, 70+62=132) -->
+  <path d="M 1200,195 C 1200,160 980,148 960,132" fill="none" stroke="#E8563A" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrow-forecast)"/>
+  <text x="1080" y="163" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#E8563A">auth</text>
+
+  <!-- 17. Harvest → Client (orange import) -->
+  <!-- From Harvest box (420+200=620, 70+31=101) to Clients box (30+155=185, 460+50=510) -->
+  <path d="M 570,132 C 550,300 350,400 215,460" fill="none" stroke="#FA5C28" stroke-width="1.8" marker-end="url(#arrow-harvest)"/>
+  <text x="390" y="316" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#FA5C28">import</text>
+
+  <!-- 18. Forecast → Allocation (red import) -->
+  <!-- From Forecast box (760+100=860, 70+62=132) to Schedule box (370+135=505, 460+100=560) -->
+  <path d="M 820,132 C 700,280 600,400 545,460" fill="none" stroke="#E8563A" stroke-width="1.8" marker-end="url(#arrow-forecast)"/>
+  <text x="660" y="310" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#E8563A">assignments</text>
+
+  <!-- 19. Harvest → WorkspaceMember (orange) -->
+  <path d="M 520,132 C 520,200 480,200 478,180" fill="none" stroke="#FA5C28" stroke-width="1.5" marker-end="url(#arrow-harvest)"/>
+  <text x="497" y="166" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#FA5C28">member</text>
+
+  <!-- 20. Forecast → Placeholder (red) -->
+  <path d="M 812,132 C 760,180 650,200 628,180" fill="none" stroke="#E8563A" stroke-width="1.5" marker-end="url(#arrow-forecast)"/>
+  <text x="700" y="165" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#E8563A">placeholder</text>
+
+  <!-- 21. Harvest → TimeEntry (orange) -->
+  <path d="M 525,132 C 480,450 280,700 200,770" fill="none" stroke="#FA5C28" stroke-width="1.5" stroke-dasharray="8,3" marker-end="url(#arrow-harvest)"/>
+  <text x="350" y="480" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#FA5C28">timeEntries</text>
+
+  <!-- 22. LinearIssue → LinearTeam (within Linear box) -->
+  <!-- Linear box at 360,770; LinearTeam at +10,38; LinearIssue at +10,108 -->
+  <path d="M 393,878 L 393,862 L 393,858 L 393,854" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+
+  <!-- 23. PokerRound → PokerSession -->
+  <!-- Poker box at 660,770; Session at +10,38; Round at +10,120 -->
+  <path d="M 705,890 L 705,870 L 705,862" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#arrow-gray)"/>
+
+  <!-- 24. PokerSession → TeifiProject (dashed optional) -->
+  <!-- From Poker box (660+135=795, 770+80=850) to Clients box (185, 460+270=730) -->
+  <path d="M 660,830 C 600,830 450,790 340,730" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-dashed)"/>
+  <text x="490" y="825" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">projectId?</text>
+
+  <!-- 25. LinearTeam → Workspace (soft dashed) -->
+  <!-- From Linear box (360+132=492, 770+60=830) to Auth Workspace (160, 170+80=250) -->
+  <path d="M 370,808 C 250,808 160,600 160,400" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrow-dashed)"/>
+  <text x="218" y="608" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#94a3b8">workspaceId</text>
+
+  <!-- ============================================================ -->
+  <!-- Version / Credits footer -->
+  <!-- ============================================================ -->
+  <text x="700" y="992" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="9" fill="#334155">teifi-pod · architecture diagram · generated 2026</text>
+</svg>

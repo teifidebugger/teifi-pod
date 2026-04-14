@@ -1,0 +1,522 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 960" width="1400" height="960" style="font-family:'Geist','Inter',system-ui,sans-serif;">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.08)"/>
+    </filter>
+    <filter id="shadow-md" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.08)"/>
+    </filter>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#CBD5E1"/>
+    </marker>
+    <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#EA580C"/>
+    </marker>
+    <marker id="arr-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#DC2626"/>
+    </marker>
+    <marker id="arr-indigo" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#5E6AD2"/>
+    </marker>
+    <marker id="arr-gray" markerWidth="6" markerHeight="6" refX="5" refY="2" orient="auto">
+      <path d="M0,0 L0,5 L6,2.5 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="960" fill="#F4F6FD"/>
+
+  <!-- TITLE -->
+  <text x="36" y="22" font-size="20" font-weight="700" fill="#18181B" letter-spacing="-0.5">teifi-pod</text>
+  <text x="146" y="22" font-size="14" fill="#71717A"> — System Architecture</text>
+  <text x="36" y="36" font-size="11" fill="#71717A">POD Management Platform · Next.js App Router + Prisma + Neon PostgreSQL</text>
+
+  <!-- ===================== SWIM LANE BACKGROUNDS ===================== -->
+
+  <!-- Lane 1: External y=50..160 -->
+  <rect x="0" y="50" width="1400" height="110" fill="#F8F9FE" rx="0"/>
+  <rect x="0" y="50" width="1400" height="1" fill="#E4E7F0"/>
+  <rect x="0" y="160" width="1400" height="1" fill="#E4E7F0"/>
+  <!-- Lane 1 label bar -->
+  <rect x="0" y="50" width="28" height="110" fill="#F4F4F5"/>
+  <rect x="28" y="50" width="1" height="110" fill="#E4E7F0"/>
+  <text x="14" y="115" font-size="10" fill="#71717A" font-weight="600" transform="rotate(-90,14,115)" text-anchor="middle" letter-spacing="0.5">EXTERNAL</text>
+
+  <!-- Lane 2: Import Pipeline y=160..300 -->
+  <rect x="0" y="160" width="1400" height="140" fill="#FFFFFF"/>
+  <rect x="0" y="300" width="1400" height="1" fill="#E4E7F0"/>
+  <rect x="0" y="160" width="28" height="140" fill="#F4F4F5"/>
+  <rect x="28" y="160" width="1" height="140" fill="#E4E7F0"/>
+  <text x="14" y="237" font-size="10" fill="#71717A" font-weight="600" transform="rotate(-90,14,237)" text-anchor="middle" letter-spacing="0.5">IMPORT PIPELINE</text>
+
+  <!-- Lane 3: Core Domain y=300..590 -->
+  <rect x="0" y="300" width="1400" height="290" fill="#F8F9FE"/>
+  <rect x="0" y="590" width="1400" height="1" fill="#E4E7F0"/>
+  <rect x="0" y="300" width="28" height="290" fill="#F4F4F5"/>
+  <rect x="28" y="300" width="1" height="290" fill="#E4E7F0"/>
+  <text x="14" y="450" font-size="10" fill="#71717A" font-weight="600" transform="rotate(-90,14,450)" text-anchor="middle" letter-spacing="0.5">CORE DOMAIN</text>
+
+  <!-- Lane 4: App Features y=590..770 -->
+  <rect x="0" y="590" width="1400" height="180" fill="#FFFFFF"/>
+  <rect x="0" y="770" width="1400" height="1" fill="#E4E7F0"/>
+  <rect x="0" y="590" width="28" height="180" fill="#F4F4F5"/>
+  <rect x="28" y="590" width="1" height="180" fill="#E4E7F0"/>
+  <text x="14" y="685" font-size="10" fill="#71717A" font-weight="600" transform="rotate(-90,14,685)" text-anchor="middle" letter-spacing="0.5">APP FEATURES</text>
+
+  <!-- Lane 5: Users y=770..900 -->
+  <rect x="0" y="770" width="1400" height="130" fill="#F8F9FE"/>
+  <rect x="0" y="900" width="1400" height="1" fill="#E4E7F0"/>
+  <rect x="0" y="770" width="28" height="130" fill="#F4F4F5"/>
+  <rect x="28" y="770" width="1" height="130" fill="#E4E7F0"/>
+  <text x="14" y="838" font-size="10" fill="#71717A" font-weight="600" transform="rotate(-90,14,838)" text-anchor="middle" letter-spacing="0.5">USERS</text>
+
+  <!-- ===================== LANE 1: EXTERNAL SYSTEMS ===================== -->
+
+  <!-- Card 1: Harvest x=120 -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="62" width="280" height="84" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="120" y="62" width="280" height="4" rx="8" fill="#EA580C"/>
+    <rect x="120" y="64" width="280" height="2" fill="#EA580C"/>
+  </g>
+  <text x="134" y="82" font-size="13" font-weight="700" fill="#18181B">🌾 Harvest</text>
+  <text x="134" y="96" font-size="11" fill="#71717A">Time tracking API</text>
+  <!-- Badges -->
+  <rect x="134" y="102" width="42" height="16" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="155" y="113" font-size="9" fill="#92400E" text-anchor="middle">clients</text>
+  <rect x="182" y="102" width="47" height="16" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="205" y="113" font-size="9" fill="#92400E" text-anchor="middle">projects</text>
+  <rect x="235" y="102" width="36" height="16" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="253" y="113" font-size="9" fill="#92400E" text-anchor="middle">tasks</text>
+  <rect x="277" y="102" width="65" height="16" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="310" y="113" font-size="9" fill="#92400E" text-anchor="middle">time_entries</text>
+  <rect x="348" y="102" width="38" height="16" rx="8" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1"/>
+  <text x="367" y="113" font-size="9" fill="#92400E" text-anchor="middle">users</text>
+
+  <!-- Card 2: Forecast x=490 -->
+  <g filter="url(#shadow)">
+    <rect x="490" y="62" width="280" height="84" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="490" y="62" width="280" height="4" rx="8" fill="#DC2626"/>
+    <rect x="490" y="64" width="280" height="2" fill="#DC2626"/>
+  </g>
+  <text x="504" y="82" font-size="13" font-weight="700" fill="#18181B">📅 Forecast</text>
+  <text x="504" y="96" font-size="11" fill="#71717A">Resource planning API</text>
+  <rect x="504" y="102" width="42" height="16" rx="8" fill="#FEE2E2" stroke="#FECACA" stroke-width="1"/>
+  <text x="525" y="113" font-size="9" fill="#991B1B" text-anchor="middle">clients</text>
+  <rect x="552" y="102" width="47" height="16" rx="8" fill="#FEE2E2" stroke="#FECACA" stroke-width="1"/>
+  <text x="575" y="113" font-size="9" fill="#991B1B" text-anchor="middle">projects</text>
+  <rect x="605" y="102" width="38" height="16" rx="8" fill="#FEE2E2" stroke="#FECACA" stroke-width="1"/>
+  <text x="624" y="113" font-size="9" fill="#991B1B" text-anchor="middle">people</text>
+  <rect x="649" y="102" width="68" height="16" rx="8" fill="#FEE2E2" stroke="#FECACA" stroke-width="1"/>
+  <text x="683" y="113" font-size="9" fill="#991B1B" text-anchor="middle">placeholders</text>
+  <rect x="723" y="102" width="62" height="16" rx="8" fill="#FEE2E2" stroke="#FECACA" stroke-width="1"/>
+  <text x="754" y="113" font-size="9" fill="#991B1B" text-anchor="middle">assignments</text>
+
+  <!-- Card 3: Linear x=860 -->
+  <g filter="url(#shadow)">
+    <rect x="860" y="62" width="280" height="84" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="860" y="62" width="280" height="4" rx="8" fill="#5E6AD2"/>
+    <rect x="860" y="64" width="280" height="2" fill="#5E6AD2"/>
+  </g>
+  <text x="874" y="82" font-size="13" font-weight="700" fill="#18181B">⚡ Linear</text>
+  <text x="874" y="96" font-size="11" fill="#71717A">Issue tracker (OAuth)</text>
+  <rect x="874" y="102" width="36" height="16" rx="8" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="892" y="113" font-size="9" fill="#3730A3" text-anchor="middle">teams</text>
+  <rect x="916" y="102" width="41" height="16" rx="8" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="936" y="113" font-size="9" fill="#3730A3" text-anchor="middle">cycles</text>
+  <rect x="963" y="102" width="37" height="16" rx="8" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+  <text x="981" y="113" font-size="9" fill="#3730A3" text-anchor="middle">issues</text>
+
+  <!-- ===================== LANE 1 to LANE 2 ARROWS (colored, solid) ===================== -->
+  <!-- Harvest bottom -> Harvest Import top -->
+  <line x1="260" y1="146" x2="260" y2="168" stroke="#EA580C" stroke-width="2" marker-end="url(#arr-orange)"/>
+  <!-- Forecast bottom -> Forecast Import top -->
+  <line x1="630" y1="146" x2="630" y2="168" stroke="#DC2626" stroke-width="2" marker-end="url(#arr-red)"/>
+  <!-- Linear bottom -> Linear Sync top -->
+  <line x1="1000" y1="146" x2="1000" y2="168" stroke="#5E6AD2" stroke-width="2" marker-end="url(#arr-indigo)"/>
+
+  <!-- ===================== LANE 2: IMPORT PIPELINE ===================== -->
+
+  <!-- Card 1: Harvest Import x=120 -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="170" width="280" height="118" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="120" y="170" width="4" height="118" rx="2" fill="#EA580C"/>
+  </g>
+  <text x="136" y="187" font-size="12" font-weight="600" fill="#EA580C">Harvest Import</text>
+  <text x="136" y="201" font-size="10" fill="#71717A">HarvestToken · AES-256-GCM</text>
+  <line x1="136" y1="207" x2="388" y2="207" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="136" y="219" font-size="10" fill="#71717A">· clients → Client (harvestId)</text>
+  <text x="136" y="232" font-size="10" fill="#71717A">· projects → TeifiProject (harvestId)</text>
+  <text x="136" y="245" font-size="10" fill="#71717A">· tasks → TeifiTask (harvestId)</text>
+  <text x="136" y="258" font-size="10" fill="#71717A">· time_entries → TimeEntry (harvestId)</text>
+  <text x="136" y="271" font-size="10" fill="#71717A">· users → WorkspaceMember (harvestId)</text>
+
+  <!-- Card 2: Forecast Import x=490 -->
+  <g filter="url(#shadow)">
+    <rect x="490" y="170" width="280" height="118" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="490" y="170" width="4" height="118" rx="2" fill="#DC2626"/>
+  </g>
+  <text x="506" y="187" font-size="12" font-weight="600" fill="#DC2626">Forecast Import</text>
+  <text x="506" y="201" font-size="10" fill="#71717A">ForecastToken · Run AFTER Harvest</text>
+  <line x1="506" y1="207" x2="758" y2="207" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="506" y="219" font-size="10" fill="#71717A">· clients → Client (forecastId)</text>
+  <text x="506" y="232" font-size="10" fill="#71717A">· projects → TeifiProject (forecastId)</text>
+  <text x="506" y="245" font-size="10" fill="#71717A">· people → WorkspaceMember (forecastId + harvest_user_id)</text>
+  <text x="506" y="258" font-size="10" fill="#71717A">· placeholders → Placeholder (forecastId)</text>
+  <text x="506" y="271" font-size="10" fill="#71717A">· assignments → Allocation</text>
+
+  <!-- Card 3: Linear Sync x=860 -->
+  <g filter="url(#shadow)">
+    <rect x="860" y="170" width="280" height="118" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="860" y="170" width="4" height="118" rx="2" fill="#5E6AD2"/>
+  </g>
+  <text x="876" y="187" font-size="12" font-weight="600" fill="#5E6AD2">Linear Sync</text>
+  <text x="876" y="201" font-size="10" fill="#71717A">LinearUserToken · OAuth</text>
+  <line x1="876" y1="207" x2="1128" y2="207" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="876" y="219" font-size="10" fill="#71717A">· teams → LinearTeam</text>
+  <text x="876" y="232" font-size="10" fill="#71717A">· cycles → LinearCycle</text>
+  <text x="876" y="245" font-size="10" fill="#71717A">· issues → LinearIssue (cached)</text>
+  <text x="876" y="258" font-size="10" fill="#71717A">· BulkLinearMapping</text>
+
+  <!-- ===================== LANE 2 to LANE 3 ARROWS ===================== -->
+  <!-- Harvest Import -> PEOPLE, PROJECTS, TIME clusters (dashed orange) -->
+  <line x1="230" y1="288" x2="175" y2="308" stroke="#EA580C" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+  <line x1="260" y1="288" x2="405" y2="308" stroke="#EA580C" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+  <line x1="290" y1="288" x2="1000" y2="308" stroke="#EA580C" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+
+  <!-- Forecast Import -> PEOPLE, PROJECTS, SCHEDULE (dashed red) -->
+  <line x1="600" y1="288" x2="200" y2="308" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+  <line x1="630" y1="288" x2="430" y2="308" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+  <line x1="660" y1="288" x2="650" y2="308" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-red)"/>
+
+  <!-- ===================== LANE 3: CORE DOMAIN ===================== -->
+
+  <!-- CLUSTER A: PEOPLE x=45, w=230, border #5466E8 -->
+  <g filter="url(#shadow-md)">
+    <rect x="45" y="308" width="230" height="268" rx="10" fill="#FFFFFF" stroke="#5466E8" stroke-width="1.5"/>
+    <rect x="45" y="308" width="230" height="26" rx="10" fill="#EEF2FF"/>
+    <rect x="45" y="322" width="230" height="12" fill="#EEF2FF"/>
+  </g>
+  <text x="57" y="325" font-size="11" font-weight="700" fill="#3730A3" letter-spacing="0.5">PEOPLE</text>
+
+  <!-- WorkspaceMember pill -->
+  <rect x="57" y="342" width="206" height="62" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="65" y="355" font-size="11" font-weight="700" fill="#18181B">WorkspaceMember</text>
+  <text x="65" y="368" font-size="9" fill="#71717A">userId · role · roles[]</text>
+  <text x="65" y="380" font-size="9" fill="#71717A">weeklyCapacityHours</text>
+  <text x="65" y="392" font-size="9" fill="#71717A">harvestId 🔗 · forecastId 🔗</text>
+
+  <!-- WorkspaceRole pill -->
+  <rect x="57" y="412" width="206" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="65" y="426" font-size="11" font-weight="700" fill="#18181B">WorkspaceRole (Guild)</text>
+  <text x="65" y="440" font-size="9" fill="#71717A">name · workspaceId</text>
+  <text x="65" y="452" font-size="9" fill="#71717A" opacity="0">.</text>
+
+  <!-- Placeholder pill -->
+  <rect x="57" y="468" width="206" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="65" y="482" font-size="11" font-weight="700" fill="#18181B">Placeholder</text>
+  <text x="65" y="495" font-size="9" fill="#71717A">name · roles[]</text>
+  <text x="65" y="507" font-size="9" fill="#71717A">forecastId 🔗</text>
+
+  <!-- roles[] label inside A -->
+  <line x1="160" y1="452" x2="160" y2="468" stroke="#94A3B8" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr-gray)"/>
+  <text x="164" y="461" font-size="8" fill="#94A3B8">roles[]</text>
+
+  <!-- CLUSTER B: PROJECTS x=290, w=230 -->
+  <g filter="url(#shadow-md)">
+    <rect x="290" y="308" width="230" height="268" rx="10" fill="#FFFFFF" stroke="#EA580C" stroke-width="1.5"/>
+    <rect x="290" y="308" width="230" height="26" rx="10" fill="#FFF7ED"/>
+    <rect x="290" y="322" width="230" height="12" fill="#FFF7ED"/>
+  </g>
+  <text x="302" y="325" font-size="11" font-weight="700" fill="#C2410C" letter-spacing="0.5">PROJECTS</text>
+
+  <!-- Client pill -->
+  <rect x="302" y="342" width="206" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="310" y="356" font-size="11" font-weight="700" fill="#18181B">Client</text>
+  <text x="310" y="369" font-size="9" fill="#71717A">name · harvestId 🔗</text>
+  <text x="310" y="381" font-size="9" fill="#71717A">forecastId 🔗</text>
+
+  <!-- TeifiProject pill -->
+  <rect x="302" y="398" width="206" height="62" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="310" y="412" font-size="11" font-weight="700" fill="#18181B">TeifiProject</text>
+  <text x="310" y="425" font-size="9" fill="#71717A">clientId · podId? · status</text>
+  <text x="310" y="437" font-size="9" fill="#71717A">harvestId 🔗 · forecastId 🔗</text>
+  <text x="310" y="449" font-size="9" fill="#71717A">linearTeamId?</text>
+
+  <!-- TeifiTask pill -->
+  <rect x="302" y="468" width="206" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="310" y="482" font-size="11" font-weight="700" fill="#18181B">TeifiTask</text>
+  <text x="310" y="495" font-size="9" fill="#71717A">projectId · isBillable</text>
+  <text x="310" y="507" font-size="9" fill="#71717A">harvestId 🔗</text>
+
+  <!-- clientId arrow inside B: TeifiProject -> Client -->
+  <line x1="405" y1="398" x2="405" y2="390" stroke="#94A3B8" stroke-width="1" marker-end="url(#arr-gray)"/>
+  <text x="408" y="395" font-size="8" fill="#94A3B8">clientId</text>
+
+  <!-- CLUSTER C: SCHEDULE x=535, w=200 -->
+  <g filter="url(#shadow-md)">
+    <rect x="535" y="308" width="200" height="268" rx="10" fill="#FFFFFF" stroke="#9333EA" stroke-width="1.5"/>
+    <rect x="535" y="308" width="200" height="26" rx="10" fill="#FAF5FF"/>
+    <rect x="535" y="322" width="200" height="12" fill="#FAF5FF"/>
+  </g>
+  <text x="547" y="325" font-size="11" font-weight="700" fill="#7E22CE" letter-spacing="0.5">SCHEDULE</text>
+
+  <!-- Allocation pill -->
+  <rect x="547" y="342" width="176" height="90" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="555" y="356" font-size="11" font-weight="700" fill="#18181B">Allocation</text>
+  <text x="555" y="369" font-size="9" fill="#71717A">projectId · type</text>
+  <text x="555" y="381" font-size="9" fill="#71717A">memberId? OR</text>
+  <text x="555" y="393" font-size="9" fill="#71717A">placeholderId?</text>
+  <text x="555" y="405" font-size="9" fill="#71717A">startDate · endDate</text>
+  <text x="555" y="418" font-size="9" fill="#71717A">hoursPerDay</text>
+
+  <!-- CLUSTER D: POD x=750, w=190 -->
+  <g filter="url(#shadow-md)">
+    <rect x="750" y="308" width="190" height="268" rx="10" fill="#FFFFFF" stroke="#DC2626" stroke-width="1.5"/>
+    <rect x="750" y="308" width="190" height="26" rx="10" fill="#FEF2F2"/>
+    <rect x="750" y="322" width="190" height="12" fill="#FEF2F2"/>
+  </g>
+  <text x="762" y="325" font-size="11" font-weight="700" fill="#B91C1C" letter-spacing="0.5">POD</text>
+
+  <!-- Pod pill -->
+  <rect x="762" y="342" width="166" height="62" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="770" y="356" font-size="11" font-weight="700" fill="#18181B">Pod</text>
+  <text x="770" y="369" font-size="9" fill="#71717A">name · type</text>
+  <text x="770" y="381" font-size="9" fill="#71717A">workspaceId</text>
+  <text x="770" y="393" font-size="9" fill="#71717A" opacity="0">.</text>
+
+  <!-- PodSlot pill -->
+  <rect x="762" y="412" width="166" height="62" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="770" y="426" font-size="11" font-weight="700" fill="#18181B">PodSlot</text>
+  <text x="770" y="439" font-size="9" fill="#71717A">podId · roleName</text>
+  <text x="770" y="451" font-size="9" fill="#71717A">memberId?</text>
+  <text x="770" y="463" font-size="9" fill="#71717A" opacity="0">.</text>
+
+  <!-- CLUSTER E: TIME x=955, w=200 -->
+  <g filter="url(#shadow-md)">
+    <rect x="955" y="308" width="200" height="268" rx="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.5"/>
+    <rect x="955" y="308" width="200" height="26" rx="10" fill="#EFF6FF"/>
+    <rect x="955" y="322" width="200" height="12" fill="#EFF6FF"/>
+  </g>
+  <text x="967" y="325" font-size="11" font-weight="700" fill="#1D4ED8" letter-spacing="0.5">TIME</text>
+
+  <!-- TimeEntry pill -->
+  <rect x="967" y="342" width="176" height="76" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="975" y="356" font-size="11" font-weight="700" fill="#18181B">TimeEntry</text>
+  <text x="975" y="369" font-size="9" fill="#71717A">userId · projectId</text>
+  <text x="975" y="381" font-size="9" fill="#71717A">taskId? · durationSeconds</text>
+  <text x="975" y="393" font-size="9" fill="#71717A">harvestId 🔗</text>
+  <text x="975" y="405" font-size="9" fill="#71717A" opacity="0">.</text>
+
+  <!-- TimesheetWeek pill -->
+  <rect x="967" y="426" width="176" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="975" y="440" font-size="11" font-weight="700" fill="#18181B">TimesheetWeek</text>
+  <text x="975" y="453" font-size="9" fill="#71717A">userId · weekStart</text>
+  <text x="975" y="465" font-size="9" fill="#71717A">status</text>
+
+  <!-- CLUSTER F: LINEAR x=1170, w=195 -->
+  <g filter="url(#shadow-md)">
+    <rect x="1170" y="308" width="195" height="268" rx="10" fill="#FFFFFF" stroke="#6366F1" stroke-width="1.5"/>
+    <rect x="1170" y="308" width="195" height="26" rx="10" fill="#EEF2FF"/>
+    <rect x="1170" y="322" width="195" height="12" fill="#EEF2FF"/>
+  </g>
+  <text x="1182" y="325" font-size="11" font-weight="700" fill="#4338CA" letter-spacing="0.5">LINEAR</text>
+
+  <!-- LinearTeam pill -->
+  <rect x="1182" y="342" width="171" height="62" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="1190" y="356" font-size="11" font-weight="700" fill="#18181B">LinearTeam</text>
+  <text x="1190" y="369" font-size="9" fill="#71717A">workspaceId · name</text>
+  <text x="1190" y="381" font-size="9" fill="#71717A">key</text>
+  <text x="1190" y="393" font-size="9" fill="#71717A" opacity="0">.</text>
+
+  <!-- LinearIssue pill -->
+  <rect x="1182" y="412" width="171" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="1190" y="426" font-size="11" font-weight="700" fill="#18181B">LinearIssue</text>
+  <text x="1190" y="439" font-size="9" fill="#71717A">teamId · identifier</text>
+  <text x="1190" y="452" font-size="9" fill="#71717A">state</text>
+
+  <!-- LinearCycle pill -->
+  <rect x="1182" y="468" width="171" height="48" rx="6" fill="#FAFAFA" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="1190" y="482" font-size="11" font-weight="700" fill="#18181B">LinearCycle</text>
+  <text x="1190" y="495" font-size="9" fill="#71717A">teamId · name</text>
+  <text x="1190" y="507" font-size="9" fill="#71717A">startsAt · endsAt</text>
+
+  <!-- ===================== INTRA-LANE-3 RELATIONSHIP ARROWS ===================== -->
+  <!-- Allocation (C) -> TeifiProject (B): projectId -->
+  <path d="M535,420 C510,420 510,430 490,430" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="496" y="416" font-size="8" fill="#94A3B8">projectId</text>
+
+  <!-- Allocation (C) -> WorkspaceMember (A): memberId? -->
+  <path d="M535,395 C520,395 300,390 275,385" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="348" y="382" font-size="8" fill="#94A3B8">memberId?</text>
+
+  <!-- Allocation (C) -> Placeholder (A): placeholderId? -->
+  <path d="M535,408 C518,408 310,490 275,490" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="340" y="478" font-size="8" fill="#94A3B8">placeholderId?</text>
+
+  <!-- TeifiProject (B) -> Pod (D): podId? -->
+  <path d="M520,430 C640,430 700,430 750,430" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="610" y="424" font-size="8" fill="#94A3B8">podId?</text>
+
+  <!-- PodSlot (D) -> WorkspaceMember (A): memberId? -->
+  <path d="M750,443 C700,443 310,443 275,443" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="370" y="437" font-size="8" fill="#94A3B8">memberId?</text>
+
+  <!-- TimeEntry (E) -> TeifiProject (B): projectId -->
+  <path d="M955,370 C900,370 545,395 520,415" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="700" y="367" font-size="8" fill="#94A3B8">projectId</text>
+
+  <!-- TeifiProject (B) -> LinearTeam (F): linearTeamId? -->
+  <path d="M520,449 C845,449 1100,430 1170,420" stroke="#94A3B8" stroke-width="1" fill="none" stroke-dasharray="4,3" marker-end="url(#arr-gray)"/>
+  <text x="800" y="444" font-size="8" fill="#94A3B8">linearTeamId?</text>
+
+  <!-- ===================== LANE 4: APP FEATURES ===================== -->
+
+  <!-- Card 1: Schedule/Gantt x=45 -->
+  <g filter="url(#shadow)">
+    <rect x="45" y="600" width="200" height="155" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="45" y="600" width="3" height="155" rx="2" fill="#9333EA"/>
+  </g>
+  <text x="58" y="618" font-size="13">📅</text>
+  <text x="76" y="618" font-size="12" font-weight="700" fill="#18181B">Schedule / Gantt</text>
+  <line x1="58" y1="625" x2="233" y2="625" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="58" y="638" font-size="10" fill="#71717A">Gantt view</text>
+  <text x="58" y="652" font-size="10" fill="#71717A">Allocation CRUD</text>
+  <text x="58" y="666" font-size="10" fill="#71717A">Filter by guild</text>
+  <text x="58" y="680" font-size="10" fill="#71717A">Member / Project view</text>
+
+  <!-- Card 2: POD Management x=260 -->
+  <g filter="url(#shadow)">
+    <rect x="260" y="600" width="200" height="155" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="260" y="600" width="3" height="155" rx="2" fill="#DC2626"/>
+  </g>
+  <text x="273" y="618" font-size="13">🏢</text>
+  <text x="291" y="618" font-size="12" font-weight="700" fill="#18181B">POD Management</text>
+  <line x1="273" y1="625" x2="448" y2="625" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="273" y="638" font-size="10" fill="#71717A">Pod structure</text>
+  <text x="273" y="652" font-size="10" fill="#71717A">PodSlot fill</text>
+  <text x="273" y="666" font-size="10" fill="#71717A">Capacity view</text>
+  <text x="273" y="680" font-size="10" fill="#71717A">Unassigned panel</text>
+
+  <!-- Card 3: Time Tracking x=475 -->
+  <g filter="url(#shadow)">
+    <rect x="475" y="600" width="200" height="155" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="475" y="600" width="3" height="155" rx="2" fill="#2563EB"/>
+  </g>
+  <text x="488" y="618" font-size="13">⏱</text>
+  <text x="505" y="618" font-size="12" font-weight="700" fill="#18181B">Time Tracking</text>
+  <line x1="488" y1="625" x2="663" y2="625" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="488" y="638" font-size="10" fill="#71717A">Timer</text>
+  <text x="488" y="652" font-size="10" fill="#71717A">TimeEntry CRUD</text>
+  <text x="488" y="666" font-size="10" fill="#71717A">Timesheets</text>
+  <text x="488" y="680" font-size="10" fill="#71717A">Approval flow</text>
+
+  <!-- Card 4: Reports x=690 -->
+  <g filter="url(#shadow)">
+    <rect x="690" y="600" width="200" height="155" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="690" y="600" width="3" height="155" rx="2" fill="#0891B2"/>
+  </g>
+  <text x="703" y="618" font-size="13">📊</text>
+  <text x="720" y="618" font-size="12" font-weight="700" fill="#18181B">Reports</text>
+  <line x1="703" y1="625" x2="878" y2="625" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="703" y="638" font-size="10" fill="#71717A">Utilisation</text>
+  <text x="703" y="652" font-size="10" fill="#71717A">Budget</text>
+  <text x="703" y="666" font-size="10" fill="#71717A">Linear workload</text>
+  <text x="703" y="680" font-size="10" fill="#71717A">Expense tracking</text>
+
+  <!-- Card 5: Settings/Integrations x=905 -->
+  <g filter="url(#shadow)">
+    <rect x="905" y="600" width="200" height="155" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="905" y="600" width="3" height="155" rx="2" fill="#D97706"/>
+  </g>
+  <text x="918" y="618" font-size="13">⚙️</text>
+  <text x="935" y="618" font-size="11" font-weight="700" fill="#18181B">Settings / Integrations</text>
+  <line x1="918" y1="625" x2="1093" y2="625" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="918" y="638" font-size="10" fill="#71717A">HarvestImport</text>
+  <text x="918" y="652" font-size="10" fill="#71717A">ForecastImport</text>
+  <text x="918" y="666" font-size="10" fill="#71717A">Linear OAuth</text>
+  <text x="918" y="680" font-size="10" fill="#71717A">BulkMapping</text>
+
+  <!-- Card 6: Estimation Poker x=1120 -->
+  <g filter="url(#shadow)">
+    <rect x="1120" y="600" width="200" height="155" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+    <rect x="1120" y="600" width="3" height="155" rx="2" fill="#7C3AED"/>
+  </g>
+  <text x="1133" y="618" font-size="13">🎲</text>
+  <text x="1150" y="618" font-size="12" font-weight="700" fill="#18181B">Estimation Poker</text>
+  <line x1="1133" y1="625" x2="1308" y2="625" stroke="#E4E7F0" stroke-width="1"/>
+  <text x="1133" y="638" font-size="10" fill="#71717A">PokerSession</text>
+  <text x="1133" y="652" font-size="10" fill="#71717A">Rounds · Voting</text>
+  <text x="1133" y="666" font-size="10" fill="#71717A">Linear issue link</text>
+
+  <!-- Domain cluster to feature card light arrows -->
+  <line x1="160" y1="576" x2="145" y2="600" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="405" y1="576" x2="370" y2="600" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="635" y1="576" x2="575" y2="600" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="845" y1="576" x2="370" y2="600" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="1055" y1="576" x2="585" y2="600" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <line x1="1267" y1="576" x2="1220" y2="600" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- ===================== LANE 5: USERS ===================== -->
+
+  <!-- Card 1: Owner/Admin x=50 -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="782" width="280" height="100" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+  </g>
+  <circle cx="92" cy="832" r="20" fill="#5466E8"/>
+  <text x="92" y="837" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">O</text>
+  <text x="124" y="820" font-size="13" font-weight="700" fill="#18181B">Owner / Admin</text>
+  <text x="124" y="836" font-size="10" fill="#71717A">Full access · manage workspace,</text>
+  <text x="124" y="850" font-size="10" fill="#71717A">integrations, import</text>
+
+  <!-- Card 2: Manager x=380 -->
+  <g filter="url(#shadow)">
+    <rect x="380" y="782" width="280" height="100" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+  </g>
+  <circle cx="422" cy="832" r="20" fill="#9333EA"/>
+  <text x="422" y="837" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">M</text>
+  <text x="454" y="820" font-size="13" font-weight="700" fill="#18181B">Manager</text>
+  <text x="454" y="836" font-size="10" fill="#71717A">Manage members, projects, schedule</text>
+  <text x="454" y="850" font-size="10" fill="#71717A">· all reports</text>
+
+  <!-- Card 3: Member x=710 -->
+  <g filter="url(#shadow)">
+    <rect x="710" y="782" width="280" height="100" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+  </g>
+  <circle cx="752" cy="832" r="20" fill="#2563EB"/>
+  <text x="752" y="837" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">M</text>
+  <text x="784" y="820" font-size="13" font-weight="700" fill="#18181B">Member</text>
+  <text x="784" y="836" font-size="10" fill="#71717A">Log time · view own schedule</text>
+  <text x="784" y="850" font-size="10" fill="#71717A">· poker participant</text>
+
+  <!-- Feature cards to users arrows -->
+  <line x1="145" y1="755" x2="160" y2="782" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+  <line x1="370" y1="755" x2="420" y2="782" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+  <line x1="585" y1="755" x2="755" y2="782" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+  <line x1="1220" y1="755" x2="1180" y2="782" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arr)"/>
+
+  <!-- ===================== LEGEND ===================== -->
+  <g filter="url(#shadow)">
+    <rect x="1200" y="620" width="172" height="128" rx="8" fill="#FFFFFF" stroke="#E2E6F3" stroke-width="1"/>
+  </g>
+  <text x="1212" y="636" font-size="10" font-weight="600" fill="#71717A" letter-spacing="0.5">LEGEND</text>
+  <line x1="1212" y1="642" x2="1360" y2="642" stroke="#E4E7F0" stroke-width="1"/>
+  <!-- FK arrow -->
+  <line x1="1212" y1="655" x2="1240" y2="655" stroke="#18181B" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="1247" y="658" font-size="10" fill="#18181B">Foreign key (FK)</text>
+  <!-- Soft ref dashed -->
+  <line x1="1212" y1="672" x2="1240" y2="672" stroke="#18181B" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <text x="1247" y="675" font-size="10" fill="#18181B">Soft ref / optional</text>
+  <!-- External ID -->
+  <text x="1212" y="692" font-size="10" fill="#18181B">🔗  External ID</text>
+  <text x="1247" y="704" font-size="9" fill="#71717A">(harvestId / forecastId)</text>
+  <!-- Import flow dots -->
+  <circle cx="1218" cy="718" r="5" fill="#EA580C"/>
+  <text x="1228" y="722" font-size="10" fill="#18181B">Harvest import flow</text>
+  <circle cx="1218" cy="733" r="5" fill="#DC2626"/>
+  <text x="1228" y="737" font-size="10" fill="#18181B">Forecast import flow</text>
+
+  <!-- Bottom border -->
+  <rect x="0" y="900" width="1400" height="60" fill="#F4F6FD"/>
+  <text x="36" y="928" font-size="10" fill="#71717A">teifi-pod · Database: Neon PostgreSQL · ORM: Prisma · Auth: NextAuth.js · Queue: — · Deploy: Vercel</text>
+
+</svg>

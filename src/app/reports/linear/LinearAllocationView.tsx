@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ExternalLink, ChevronDown, ChevronRight, Search, Users, LayoutList, AlertCircle, BarChart2, Layers, Bookmark, BookmarkCheck } from 'lucide-react'
 import { format, parseISO, formatDistanceToNow, differenceInMinutes } from 'date-fns'
-import type { MemberAllocationData, LinearIssue, LinearReportFilters, InvolvedUser, WeekAllocation } from './page'
+import type { MemberAllocationData, LinearIssue, LinearReportFilters, InvolvedUser, WeekAllocation, PodOption } from './page'
 
 const STATUS_ORDER = [
     'In Progress',
@@ -536,7 +536,7 @@ function InvolvedSection({ issues }: { issues: InvolvedIssue[] }) {
 const IMPLEMENTING_STATES = new Set(['In Progress', 'Not Started', 'Evaluation', 'Triage'])
 // WAITING_STATES already defined above
 
-function MemberCard({ member, involvedIssues = [] }: { member: MemberAllocationData; involvedIssues?: InvolvedIssue[] }) {
+function MemberCard({ member, involvedIssues = [], allPods = [], podFilter = '' }: { member: MemberAllocationData; involvedIssues?: InvolvedIssue[]; allPods?: PodOption[]; podFilter?: string }) {
     const implementing = [...member.issues]
         .filter((i) => IMPLEMENTING_STATES.has(i.stateName))
         .sort((a, b) => STATUS_ORDER.indexOf(a.stateName) - STATUS_ORDER.indexOf(b.stateName))
@@ -589,6 +589,15 @@ function MemberCard({ member, involvedIssues = [] }: { member: MemberAllocationD
                             {member.isPlaceholder && (
                                 <span className="text-[10px] text-amber-600 dark:text-amber-400 border border-amber-400/40 bg-amber-400/10 rounded px-1.5 py-0.5">Placeholder</span>
                             )}
+                            {/* POD badges — only when not already filtered to a single pod */}
+                            {!podFilter && member.podIds.map((podId) => {
+                                const pod = allPods.find((p) => p.id === podId)
+                                return pod ? (
+                                    <span key={podId} className="text-[10px] px-1.5 py-0.5 rounded border border-violet-500/25 bg-violet-500/10 text-violet-400">
+                                        {pod.name}
+                                    </span>
+                                ) : null
+                            })}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">
                             {member.roles.join(' / ') || '—'}
@@ -930,6 +939,259 @@ function AlignmentCrossRefTable({ members }: { members: MemberAllocationData[] }
     )
 }
 
+// ─── POD Briefing Panel ────────────────────────────────────────────────────────
+
+function PodBriefingPanel({
+    members,
+    allPods,
+    podFilter,
+}: {
+    members: MemberAllocationData[]
+    allPods: PodOption[]
+    podFilter: string
+}) {
+    const [collapsed, setCollapsed] = useState(false)
+    const podName = allPods.find((p) => p.id === podFilter)?.name ?? 'POD'
+
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+
+    // ── Needs Attention ──────────────────────────────────────────────────────
+    type BlockedItem = {
+        issue: LinearIssue
+        assigneeName: string
+        assigneeAvatar: string | null
+        daysBlocked: number
+    }
+
+    const blockedItems: BlockedItem[] = members
+        .filter((m) => !m.isPlaceholder && m.hasLinearToken)
+        .flatMap((m) =>
+            m.issues
+                .filter((i) => i.stateName === 'Blocked' || i.stateName === 'Client Blocked')
+                .map((i) => ({
+                    issue: i,
+                    assigneeName: m.name,
+                    assigneeAvatar: m.avatarUrl,
+                    daysBlocked: Math.floor(
+                        (Date.now() - new Date(i.updatedAt ?? Date.now()).getTime()) / 86_400_000,
+                    ),
+                })),
+        )
+        .sort((a, b) => b.daysBlocked - a.daysBlocked)
+
+    const clientWaiting: BlockedItem[] = members
+        .filter((m) => !m.isPlaceholder && m.hasLinearToken)
+        .flatMap((m) =>
+            m.issues
+                .filter((i) => i.stateName === 'Client Review')
+                .map((i) => ({
+                    issue: i,
+                    assigneeName: m.name,
+                    assigneeAvatar: m.avatarUrl,
+                    daysBlocked: Math.floor(
+                        (Date.now() - new Date(i.updatedAt ?? Date.now()).getTime()) / 86_400_000,
+                    ),
+                }))
+                .filter((x) => x.daysBlocked >= 3),
+        )
+        .sort((a, b) => b.daysBlocked - a.daysBlocked)
+
+    const misalignedRows = members
+        .filter((m) => !m.isPlaceholder && m.hasLinearToken)
+        .map((m) => computeAlignmentRow(m))
+        .filter((r) => r.alignment === 'misaligned' || r.alignment === 'partial')
+
+    const attentionCount = blockedItems.length + clientWaiting.length + misalignedRows.length
+
+    // ── Team Status ──────────────────────────────────────────────────────────
+    const activeMembers = members.filter(
+        (m) => !m.isPlaceholder && m.hasLinearToken && m.ipTasks > 0,
+    )
+    const freeMembers = members.filter(
+        (m) =>
+            !m.isPlaceholder &&
+            m.hasLinearToken &&
+            m.ipTasks === 0 &&
+            m.currentWeekAllocations.length > 0,
+    )
+    const noLinearCount = members.filter(
+        (m) => !m.isPlaceholder && !m.hasLinearToken,
+    ).length
+
+    const isClean = attentionCount === 0
+
+    return (
+        <div
+            className={`rounded-lg border overflow-hidden ${
+                attentionCount > 0
+                    ? 'border-red-400/30 bg-red-400/5'
+                    : 'border-emerald-400/30 bg-emerald-400/5'
+            }`}
+        >
+            {/* Header */}
+            <button
+                onClick={() => setCollapsed((v) => !v)}
+                className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-black/5 transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    {collapsed ? (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className="font-semibold text-sm">{podName} · Today</span>
+                    {attentionCount > 0 && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/20 font-medium">
+                            {attentionCount} issue{attentionCount > 1 ? 's' : ''}
+                        </span>
+                    )}
+                    {isClean && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 font-medium">
+                            All clear
+                        </span>
+                    )}
+                </div>
+                <span className="text-xs text-muted-foreground">{today}</span>
+            </button>
+
+            {!collapsed && (
+                <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                    {/* Left: Needs Attention */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                            {attentionCount > 0 ? `Needs Attention (${attentionCount})` : 'Needs Attention'}
+                        </p>
+
+                        {attentionCount === 0 && (
+                            <p className="text-sm text-muted-foreground">No blockers or misalignments.</p>
+                        )}
+
+                        {/* Blocked issues */}
+                        {blockedItems.slice(0, 5).map(({ issue, assigneeName, daysBlocked }) => (
+                            <div key={issue.id} className="flex items-start gap-2 text-sm">
+                                <span className="mt-0.5 h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <a
+                                            href={issue.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-mono text-xs text-muted-foreground hover:text-foreground shrink-0"
+                                        >
+                                            {issue.identifier}
+                                        </a>
+                                        <span className="truncate text-foreground/90">{issue.title}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                        <span className="text-xs text-red-400 border border-red-500/20 bg-red-500/10 px-1.5 py-0 rounded">
+                                            {issue.stateName}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">{assigneeName}</span>
+                                        {daysBlocked > 0 && (
+                                            <span className="text-xs text-amber-400">{daysBlocked}d blocked</span>
+                                        )}
+                                        {issue.involvedUsers.length > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                · waiting on {issue.involvedUsers.map((u) => u.name).join(', ')}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Client waiting */}
+                        {clientWaiting.slice(0, 3).map(({ issue, assigneeName, daysBlocked }) => (
+                            <div key={issue.id} className="flex items-start gap-2 text-sm">
+                                <span className="mt-0.5 h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <a
+                                            href={issue.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-mono text-xs text-muted-foreground hover:text-foreground shrink-0"
+                                        >
+                                            {issue.identifier}
+                                        </a>
+                                        <span className="truncate text-foreground/90">{issue.title}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="text-xs text-amber-400 border border-amber-500/20 bg-amber-500/10 px-1.5 py-0 rounded">
+                                            Client Review
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">{assigneeName}</span>
+                                        <span className="text-xs text-amber-400">{daysBlocked}d waiting</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Misaligned */}
+                        {misalignedRows.map(({ m, extraTeams, missingTeams, alignment }) => (
+                            <div key={m.memberId} className="flex items-start gap-2 text-sm">
+                                <span className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${alignment === 'misaligned' ? 'bg-red-400' : 'bg-yellow-400'}`} />
+                                <div className="min-w-0">
+                                    <span className="text-foreground/90">{m.name}</span>
+                                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                        <span className={`text-xs px-1.5 py-0 rounded border ${alignment === 'misaligned' ? 'text-red-400 border-red-500/20 bg-red-500/10' : 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10'}`}>
+                                            Off-schedule
+                                        </span>
+                                        {extraTeams.length > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                working: {extraTeams.join(', ')}
+                                            </span>
+                                        )}
+                                        {missingTeams.length > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                not on: {missingTeams.join(', ')}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Right: Team Status */}
+                    <div className="space-y-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                            Team Status ({members.filter((m) => !m.isPlaceholder).length} members)
+                        </p>
+
+                        {activeMembers.map((m) => (
+                            <div key={m.memberId} className="flex items-center gap-2 text-sm">
+                                <MemberAvatar member={{ name: m.name, avatarUrl: m.avatarUrl }} size={20} />
+                                <span className="text-foreground/90 flex-1 truncate">{m.name}</span>
+                                <span className="text-xs text-blue-400 shrink-0">{m.ipTasks} IP{m.ipTasks > 1 ? '' : ''}</span>
+                                {m.ipPts > 0 && (
+                                    <span className="text-xs text-muted-foreground shrink-0">· {m.ipPts}pts</span>
+                                )}
+                            </div>
+                        ))}
+
+                        {freeMembers.map((m) => (
+                            <div key={m.memberId} className="flex items-center gap-2 text-sm">
+                                <MemberAvatar member={{ name: m.name, avatarUrl: m.avatarUrl }} size={20} />
+                                <span className="text-foreground/90 flex-1 truncate">{m.name}</span>
+                                <span className="text-xs text-emerald-400 border border-emerald-500/20 bg-emerald-500/10 px-1.5 py-0 rounded shrink-0">
+                                    Free
+                                </span>
+                            </div>
+                        ))}
+
+                        {noLinearCount > 0 && (
+                            <p className="text-xs text-muted-foreground">
+                                +{noLinearCount} without Linear
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
 // ─── Main View ─────────────────────────────────────────────────────────────────
 
 export function LinearAllocationView({
@@ -937,6 +1199,8 @@ export function LinearAllocationView({
     placeholders,
     allTeams,
     allRoles,
+    allPods,
+    currentMemberPodId,
     fetchedAt,
     filters,
 }: {
@@ -944,6 +1208,8 @@ export function LinearAllocationView({
     placeholders: MemberAllocationData[]
     allTeams: string[]
     allRoles: string[]
+    allPods: PodOption[]
+    currentMemberPodId: string | null
     fetchedAt: string
     filters: LinearReportFilters
 }) {
@@ -961,9 +1227,11 @@ export function LinearAllocationView({
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY)
         setSavedDefault(saved)
-        const hasParams = searchParams.get('q') || searchParams.get('team') || searchParams.get('role') || (searchParams.get('sort') && searchParams.get('sort') !== 'default')
+        const hasParams = searchParams.get('q') || searchParams.get('team') || searchParams.get('role') || searchParams.get('pod') || (searchParams.get('sort') && searchParams.get('sort') !== 'default')
         if (!hasParams && saved) {
             router.replace(`${pathname}?${saved}`)
+        } else if (!hasParams && !saved && currentMemberPodId) {
+            router.replace(buildUrl('pod', currentMemberPodId))
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -1047,7 +1315,7 @@ export function LinearAllocationView({
     }
 
     const activeTab = searchParams.get('tab') ?? 'overview'
-    const isFiltered = filters.q || filters.team || filters.role || filters.sort !== 'default'
+    const isFiltered = filters.q || filters.team || filters.role || filters.pod || filters.sort !== 'default'
 
     // Tab badge counts
     const waitingTotal = withLinear.reduce(
@@ -1056,6 +1324,14 @@ export function LinearAllocationView({
     )
     return (
         <div className="flex-1 space-y-4 px-4 md:px-8 pb-8">
+            {/* POD Briefing Panel — visible when a pod is selected */}
+            {filters.pod && (
+                <PodBriefingPanel
+                    members={members}
+                    allPods={allPods}
+                    podFilter={filters.pod}
+                />
+            )}
             {/* Filter bar — always visible across all tabs */}
             <div className="flex flex-wrap items-center gap-2">
                 <div className="relative flex-1 min-w-48 max-w-xs">
@@ -1067,6 +1343,23 @@ export function LinearAllocationView({
                         className="pl-8 h-8 text-sm bg-muted/20 border-border/50"
                     />
                 </div>
+
+                {allPods.length > 0 && (
+                    <Select
+                        defaultValue={filters.pod || '__all__'}
+                        onValueChange={(v) => router.replace(buildUrl('pod', v))}
+                    >
+                        <SelectTrigger className="h-8 text-sm w-44 bg-muted/20 border-border/50">
+                            <SelectValue placeholder="All pods" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="__all__">All pods</SelectItem>
+                            {allPods.map((p) => (
+                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
 
                 {allTeams.length > 0 && (
                     <Select
@@ -1362,6 +1655,8 @@ export function LinearAllocationView({
                                 key={m.memberId}
                                 member={m}
                                 involvedIssues={m.linearUserId ? (involvedMap.get(m.linearUserId) ?? []) : []}
+                                allPods={allPods}
+                                podFilter={filters.pod}
                             />
                         ))}
                     </div>

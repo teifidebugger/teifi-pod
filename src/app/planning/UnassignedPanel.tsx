@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition, useMemo } from "react"
-import { ChevronDown, ChevronRight, Search, ArrowUpDown } from "lucide-react"
+import { Search, ArrowUpDown, FolderOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -47,7 +47,6 @@ interface UnassignedPanelProps {
 }
 
 export function UnassignedPanel({ projects, pods, canManage, onAssigned }: UnassignedPanelProps) {
-  const [collapsed, setCollapsed] = useState(false)
   const [search, setSearch] = useState("")
   const [sortBy, setSortBy] = useState<SortKey>("client")
   const [assigning, setAssigning] = useState<Record<string, string>>({})
@@ -102,24 +101,17 @@ export function UnassignedPanel({ projects, pods, canManage, onAssigned }: Unass
   }, [filtered, sortBy])
 
   return (
-    <div className="border border-sidebar-border rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <button
-        className="w-full flex items-center gap-2 px-4 py-3 bg-sidebar/40 hover:bg-sidebar/70 transition-colors text-left"
-        onClick={() => setCollapsed(c => !c)}
-      >
-        {collapsed
-          ? <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-          : <ChevronDown className="size-4 text-muted-foreground shrink-0" />}
-        <span className="text-sm font-semibold">Unassigned Projects</span>
-        <Badge variant="secondary" className="ml-1 tabular-nums">{projects.length}</Badge>
-        <span className="text-xs text-muted-foreground ml-1">not yet assigned to a pod</span>
-      </button>
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-sidebar-border bg-sidebar/40 shrink-0">
+        <FolderOpen className="size-4 text-muted-foreground shrink-0" />
+        <span className="text-sm font-semibold flex-1">Unassigned</span>
+        <Badge variant="secondary" className="tabular-nums">{projects.length}</Badge>
+      </div>
 
-      {!collapsed && (
-        <>
+      <>
           {/* Toolbar */}
-          <div className="flex items-center gap-2 px-4 py-2 border-t border-sidebar-border bg-sidebar/20">
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-sidebar-border bg-sidebar/20 shrink-0">
             <div className="relative flex-1 max-w-xs">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
               <Input
@@ -152,7 +144,7 @@ export function UnassignedPanel({ projects, pods, canManage, onAssigned }: Unass
           </div>
 
           {/* List — grouped by client or flat */}
-          <div className="divide-y divide-sidebar-border">
+          <div className="divide-y divide-sidebar-border overflow-y-auto flex-1">
             {filtered.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-6">No projects match &ldquo;{search}&rdquo;</p>
             )}
@@ -160,7 +152,6 @@ export function UnassignedPanel({ projects, pods, canManage, onAssigned }: Unass
             {grouped
               ? Array.from(grouped.entries()).map(([key, { clientName, projects: group }]) => (
                   <div key={key}>
-                    {/* Client group header */}
                     <div className="bg-sidebar/60 border-b border-sidebar-border px-4 py-1.5 text-xs font-medium text-muted-foreground">
                       {clientName}
                     </div>
@@ -193,7 +184,6 @@ export function UnassignedPanel({ projects, pods, canManage, onAssigned }: Unass
             }
           </div>
         </>
-      )}
     </div>
   )
 }

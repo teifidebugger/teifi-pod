@@ -60,6 +60,8 @@ export type MemberAllocationData = {
     allocatedTeams: string[]
     /** Current-week schedule allocations from Forecast */
     currentWeekAllocations: WeekAllocation[]
+    /** Pod IDs this member belongs to (via PodSlot) */
+    podIds: string[]
     // computed
     ipTasks: number
     ipPts: number
@@ -73,7 +75,13 @@ export type LinearReportFilters = {
     q: string
     team: string
     role: string
+    pod: string
     sort: 'ip_desc' | 'tasks_desc' | 'coverage_asc' | 'name_asc' | 'default'
+}
+
+export type PodOption = {
+    id: string
+    name: string
 }
 
 function sortMembers(members: MemberAllocationData[], sort: LinearReportFilters['sort']): MemberAllocationData[] {
@@ -106,6 +114,7 @@ export default async function LinearReportPage({
     const q = (params.q ?? '').toLowerCase().trim()
     const teamFilter = params.team ?? ''
     const roleFilter = params.role ?? ''
+    const podFilter = params.pod ?? ''
     const sort = (['ip_desc', 'tasks_desc', 'coverage_asc', 'name_asc'].includes(params.sort)
         ? params.sort
         : 'default') as LinearReportFilters['sort']
@@ -150,7 +159,7 @@ export default async function LinearReportPage({
     const snapshotAge = snapshot ? today.getTime() - new Date(snapshot.fetchedAt).getTime() : Infinity
     const useSnapshot = snapshotAge < SNAPSHOT_TTL_MS
 
-    const [members, placeholders, projectMembers, weekAllocations] = await Promise.all([
+    const [members, placeholders, projectMembers, weekAllocations, pods] = await Promise.all([
         prisma.workspaceMember.findMany({
             where: { workspaceId: member.workspaceId },
             include: {
@@ -183,7 +192,28 @@ export default async function LinearReportPage({
                 project: { select: { code: true, name: true, linearTeam: { select: { name: true } } } },
             },
         }),
+        prisma.pod.findMany({
+            where: { workspaceId: member.workspaceId },
+            select: {
+                id: true,
+                name: true,
+                slots: { select: { memberId: true } },
+            },
+            orderBy: { name: 'asc' },
+        }),
     ])
+
+    // Build memberId → podId set map
+    const memberPodIds = new Map<string, Set<string>>()
+    for (const pod of pods) {
+        for (const slot of pod.slots) {
+            if (!slot.memberId) continue
+            const set = memberPodIds.get(slot.memberId) ?? new Set()
+            set.add(pod.id)
+            memberPodIds.set(slot.memberId, set)
+        }
+    }
+    const allPods: PodOption[] = pods.map((p) => ({ id: p.id, name: p.name }))
 
     // Build memberId → allocated Linear team names map
     const memberAllocatedTeams = new Map<string, Set<string>>()
@@ -223,9 +253,18 @@ export default async function LinearReportPage({
         ]),
     ].sort()
 
+    // Detect which pod the current user belongs to (first match) — for auto-select hint
+    const currentMemberPodId = !isAdmin
+        ? null
+        : pods.find((p) => p.slots.some((s) => s.memberId === member.id))?.id ?? null
+
     // Serve from snapshot if fresh enough
     if (useSnapshot) {
-        const snapshotData = snapshot!.data as MemberAllocationData[]
+        // Re-resolve podIds fresh — pod assignments may change within snapshot TTL
+        const snapshotData = (snapshot!.data as MemberAllocationData[]).map((m) => ({
+            ...m,
+            podIds: [...(memberPodIds.get(m.memberId) ?? [])],
+        }))
         const placeholderData: MemberAllocationData[] = placeholders.map((p) => ({
             memberId: `placeholder:${p.id}`,
             name: p.name,
@@ -238,6 +277,7 @@ export default async function LinearReportPage({
             issues: [],
             allocatedTeams: [],
             currentWeekAllocations: [],
+            podIds: [],
             ipTasks: 0, ipPts: 0, ipUnestimated: 0, totalTasks: 0, totalPts: 0, coveragePct: 0,
         }))
         const allTeams = [...new Set(snapshotData.flatMap((m) => m.issues.map((i) => i.teamName)).filter(Boolean))].sort()
@@ -245,6 +285,7 @@ export default async function LinearReportPage({
         if (q) filtered = filtered.filter((m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
         if (teamFilter) filtered = filtered.filter((m) => m.issues.some((i) => i.teamName === teamFilter))
         if (roleFilter) filtered = filtered.filter((m) => m.roles.includes(roleFilter))
+        if (podFilter) filtered = filtered.filter((m) => m.podIds.includes(podFilter))
         filtered = sortMembers(filtered, sort)
         if (!isAdmin) filtered = filtered.filter((m) => m.memberId === member!.id)
         return (
@@ -260,8 +301,10 @@ export default async function LinearReportPage({
                     placeholders={placeholderData}
                     allTeams={allTeams}
                     allRoles={allRoles}
+                    allPods={allPods}
+                    currentMemberPodId={currentMemberPodId}
                     fetchedAt={snapshot!.fetchedAt.toISOString()}
-                    filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, sort }}
+                    filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, pod: podFilter, sort }}
                 />
             </div>
         )
@@ -316,6 +359,7 @@ export default async function LinearReportPage({
                 isPlaceholder: false,
                 allocatedTeams: [...(memberAllocatedTeams.get(m.id) ?? [])],
                 currentWeekAllocations: memberWeekAllocs.get(m.id) ?? [],
+                podIds: [...(memberPodIds.get(m.id) ?? [])],
             }
 
             if (!linearUserId) {
@@ -429,6 +473,7 @@ export default async function LinearReportPage({
         issues: [],
         allocatedTeams: [],
         currentWeekAllocations: [],
+        podIds: [],
         ipTasks: 0,
         ipPts: 0,
         ipUnestimated: 0,
@@ -459,6 +504,9 @@ export default async function LinearReportPage({
     if (roleFilter) {
         filtered = filtered.filter((m) => m.roles.includes(roleFilter))
     }
+    if (podFilter) {
+        filtered = filtered.filter((m) => m.podIds.includes(podFilter))
+    }
     filtered = sortMembers(filtered, sort)
     if (!isAdmin) filtered = filtered.filter((m) => m.memberId === member.id)
 
@@ -482,8 +530,10 @@ export default async function LinearReportPage({
                 placeholders={placeholderData}
                 allTeams={allTeams}
                 allRoles={allRoles}
+                allPods={allPods}
+                currentMemberPodId={currentMemberPodId}
                 fetchedAt={fetchedAt.toISOString()}
-                filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, sort }}
+                filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, pod: podFilter, sort }}
             />
         </div>
     )

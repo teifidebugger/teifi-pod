@@ -9,8 +9,6 @@ import { TimerWidget } from "@/components/dashboard/TimerWidget"
 import { LiveSessionBanner } from "@/components/dashboard/LiveSessionBanner"
 import { StatCard } from "@/components/dashboard/StatCard"
 import { WorkflowShortcuts } from "@/components/dashboard/WorkflowShortcuts"
-import { GettingStartedBanner } from "@/app/GettingStartedBanner"
-import { VideoTutorialsSection } from "@/app/VideoTutorialsSection"
 
 /** Return the last N business day date strings (yyyy-MM-dd), not including today */
 function lastBusinessDays(n: number): string[] {
@@ -121,7 +119,7 @@ export default async function Dashboard() {
   const thisWeekSeconds = thisWeekAgg._sum.durationSeconds ?? 0
 
   // Admin-only data
-  const [hasLinearConnected, activeProjectsCount] = await Promise.all([
+  const [hasLinearConnected, activeProjectsCount, podsData, unassignedProjectsCount] = await Promise.all([
     isManager
       ? prisma.linearUserToken.findFirst({ where: { userId: user.id }, select: { id: true } }).then(Boolean)
       : Promise.resolve(true),
@@ -129,7 +127,23 @@ export default async function Dashboard() {
     isManager
       ? prisma.teifiProject.count({ where: { workspaceId, status: "ACTIVE" } })
       : Promise.resolve(0),
+
+    isManager
+      ? prisma.pod.findMany({
+          where: { workspaceId },
+          select: { id: true, slots: { select: { memberId: true } } },
+        })
+      : Promise.resolve([]),
+
+    isManager
+      ? prisma.teifiProject.count({ where: { workspaceId, podId: null, status: { not: "ARCHIVED" } } })
+      : Promise.resolve(0),
   ])
+
+  const totalPods = podsData.length
+  const openSlots = (podsData as { slots: { memberId: string | null }[] }[])
+    .flatMap(p => p.slots)
+    .filter(s => !s.memberId).length
 
   // Member-only data
   const timesheetWeek = !isManager
@@ -163,10 +177,6 @@ export default async function Dashboard() {
         </p>
       </div>
 
-      {/* Getting Started + Video Tutorials */}
-      <GettingStartedBanner />
-      <VideoTutorialsSection />
-
       {/* Linear setup nudge — admin only */}
       {isManager && !hasLinearConnected && (
         <div className="flex gap-3 rounded-lg border-l-2 border-l-blue-400 border border-border/50 bg-muted/30 px-4 py-3">
@@ -195,14 +205,23 @@ export default async function Dashboard() {
 
       {isManager ? (
         <>
-          {/* Admin: full-width timer */}
-          {!hiddenNavItems.includes("time") && <TimerWidget activeTimer={activeTimer} />}
-
-          {/* Admin stat cards */}
-          <div className="grid gap-4 grid-cols-3">
-            {!hiddenNavItems.includes("time") && (
-              <StatCard label="This Week" value={formatHours(thisWeekSeconds)} href="/time" />
-            )}
+          {/* POD stat cards */}
+          <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            <StatCard label="Pods" value={String(totalPods)} href="/planning" />
+            <StatCard
+              label="Open Slots"
+              value={String(openSlots)}
+              href="/planning"
+              badge={openSlots > 0 ? String(openSlots) : undefined}
+              badgeVariant="amber"
+            />
+            <StatCard
+              label="Unassigned Projects"
+              value={String(unassignedProjectsCount)}
+              href="/planning"
+              badge={unassignedProjectsCount > 0 ? String(unassignedProjectsCount) : undefined}
+              badgeVariant="amber"
+            />
             {!hiddenNavItems.includes("approvals") && (
               <StatCard
                 label="Pending Approvals"
@@ -212,8 +231,10 @@ export default async function Dashboard() {
                 badgeVariant="amber"
               />
             )}
-            <StatCard label="Active Projects" value={String(activeProjectsCount)} href="/projects" />
           </div>
+
+          {/* Timer — secondary */}
+          {!hiddenNavItems.includes("time") && <TimerWidget activeTimer={activeTimer} />}
         </>
       ) : (
         <>

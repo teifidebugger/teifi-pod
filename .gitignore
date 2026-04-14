@@ -39,3 +39,7 @@ prisma/migrations/
 # bun
 .bun/
 bun.lockb
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
