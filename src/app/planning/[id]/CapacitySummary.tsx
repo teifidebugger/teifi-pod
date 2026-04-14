@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { addDays, format, startOfDay, differenceInDays, isWithinInterval, startOfWeek, addWeeks } from 'date-fns'
+import { addDays, format, startOfDay, differenceInDays, startOfWeek, addWeeks } from 'date-fns'
 import { COLOR_HEX_MAP } from '@/lib/project-colors'
 
 export type CapacityAllocation = {
@@ -26,9 +26,13 @@ const WEEKS = 4
 
 export function CapacitySummary({ allocations, memberIds, memberNames }: CapacitySummaryProps) {
     const today = startOfDay(new Date())
-    const weekStarts = Array.from({ length: WEEKS }, (_, i) =>
-        startOfWeek(addWeeks(today, i), { weekStartsOn: 1 })
-    )
+
+    const weekStarts = useMemo(() =>
+        Array.from({ length: WEEKS }, (_, i) =>
+            startOfWeek(addWeeks(today, i), { weekStartsOn: 1 })
+        ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [])
 
     const filled = memberIds.filter(Boolean) as string[]
 
@@ -40,9 +44,7 @@ export function CapacitySummary({ allocations, memberIds, memberNames }: Capacit
             const weeks = weekStarts.map((ws) => {
                 const we = addDays(ws, 4) // Mon-Fri
                 const active = memberAllocs.filter((a) =>
-                    isWithinInterval(ws, { start: new Date(a.startDate), end: new Date(a.endDate) }) ||
-                    isWithinInterval(we, { start: new Date(a.startDate), end: new Date(a.endDate) }) ||
-                    (new Date(a.startDate) <= ws && new Date(a.endDate) >= we)
+                    new Date(a.startDate) <= we && new Date(a.endDate) >= ws
                 )
                 const totalHours = active.reduce((sum, a) => {
                     const start = new Date(a.startDate) > ws ? new Date(a.startDate) : ws

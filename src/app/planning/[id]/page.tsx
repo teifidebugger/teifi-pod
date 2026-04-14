@@ -43,10 +43,6 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
     const memberIds = pod.slots.map((s) => s.memberId).filter(Boolean) as string[]
 
     const today = new Date()
-    const weekStart = new Date(today)
-    weekStart.setDate(today.getDate() - today.getDay())
-    const weekEnd = new Date(weekStart)
-    weekEnd.setDate(weekStart.getDate() + 6)
 
     const [projects, allocations, allPods, projectMembers, podMembersDb] = await Promise.all([
         prisma.teifiProject.findMany({
@@ -93,17 +89,11 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
         }
     }
 
-    // Build current-week allocations map
+    // Build current-week allocations map — reuse allocations already fetched above
     const weekAllocsMap = new Map<string, Map<string, WeekAllocation>>()
-    const currentWeekAllocations = await prisma.allocation.findMany({
-        where: {
-            memberId: { in: memberIds },
-            startDate: { lte: today },
-            endDate: { gte: today },
-            project: { workspaceId: member.workspaceId },
-        },
-        include: { project: { select: { code: true, name: true, linearTeam: { select: { name: true } } } } },
-    })
+    const currentWeekAllocations = allocations.filter(
+        (a) => new Date(a.startDate) <= today && new Date(a.endDate) >= today
+    )
     for (const a of currentWeekAllocations) {
         if (!a.memberId) continue
         const byProject = weekAllocsMap.get(a.memberId) ?? new Map()
