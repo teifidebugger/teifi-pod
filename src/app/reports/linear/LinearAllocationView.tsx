@@ -1203,6 +1203,7 @@ export function LinearAllocationView({
     currentMemberPodId,
     fetchedAt,
     filters,
+    lockedPodId,
 }: {
     members: MemberAllocationData[]
     placeholders: MemberAllocationData[]
@@ -1212,6 +1213,7 @@ export function LinearAllocationView({
     currentMemberPodId: string | null
     fetchedAt: string
     filters: LinearReportFilters
+    lockedPodId?: string
 }) {
     const router = useRouter()
     const pathname = usePathname()
@@ -1224,7 +1226,9 @@ export function LinearAllocationView({
     const STORAGE_KEY = 'linear-report-filter-defaults'
 
     // On mount: load saved default; if no active filters → redirect to saved default
+    // Skip redirect when embedded in POD detail page (lockedPodId set)
     useEffect(() => {
+        if (lockedPodId) return
         const saved = localStorage.getItem(STORAGE_KEY)
         setSavedDefault(saved)
         const hasParams = searchParams.get('q') || searchParams.get('team') || searchParams.get('role') || searchParams.get('pod') || (searchParams.get('sort') && searchParams.get('sort') !== 'default')
@@ -1344,7 +1348,7 @@ export function LinearAllocationView({
                     />
                 </div>
 
-                {allPods.length > 0 && (
+                {allPods.length > 0 && !lockedPodId && (
                     <Select
                         defaultValue={filters.pod || '__all__'}
                         onValueChange={(v) => router.replace(buildUrl('pod', v))}

@@ -110,7 +110,9 @@ export function PodCard({ pod, workspaceMembers, canManage, onUpdated, onDeleted
         <div className="flex items-center gap-2.5 px-4 py-3 border-b border-sidebar-border bg-sidebar/40">
           <span className={`size-2.5 rounded-full shrink-0 ${dotColor}`} />
           <div className="flex-1 min-w-0">
-            <span className="font-semibold text-sm block truncate">{pod.name}</span>
+            <Link href={`/planning/${pod.id}`} className="font-semibold text-sm block truncate hover:underline">
+              {pod.name}
+            </Link>
             <span className="text-[10px] text-muted-foreground">{POD_TYPE_LABELS[pod.type] ?? pod.type}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
