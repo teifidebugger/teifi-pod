@@ -248,7 +248,7 @@ function UATIssueCard({ issue, subIssues, teamId, onAction, isDragging = false, 
                         allowedTransitions={cardAllowedTransitions}
                         disabledTargets={disabledTargets}
                         onSuccess={onSuccess}
-                        layout="pill"
+                        layout="stack"
                     />
                 </div>
             )}
