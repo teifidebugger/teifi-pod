@@ -2,7 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/app/actions'
 import { PodDetailTabs } from './PodDetailTabs'
-import type { MemberAllocationData, PodOption, WeekAllocation } from '@/app/reports/linear/page'
+import type { MemberAllocationData, PodOption, WeekAllocation, CycleOption } from '@/app/reports/linear/page'
 import { createClient } from '@/lib/linear-genql'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
@@ -44,7 +44,7 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
 
     const today = new Date()
 
-    const [projects, allocations, allPods, projectMembers, podMembersDb] = await Promise.all([
+    const [projects, allocations, allPods, projectMembers, podMembersDb, cyclesRaw] = await Promise.all([
         prisma.teifiProject.findMany({
             where: { podId: id, status: { not: 'ARCHIVED' } },
             include: { client: { select: { name: true } } },
@@ -76,7 +76,23 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
             where: { id: { in: memberIds } },
             include: { user: { include: { linearTokens: { take: 1, orderBy: { updatedAt: 'desc' } } } } },
         }),
+        prisma.linearCycle.findMany({
+            where: { team: { workspaceId: member.workspaceId } },
+            include: { team: { select: { name: true } } },
+            orderBy: { startsAt: 'desc' },
+            take: 30,
+        }),
     ])
+
+    const allCycles: CycleOption[] = cyclesRaw.map((c) => ({
+        id: c.id,
+        number: c.number,
+        name: c.name ?? null,
+        teamId: c.teamId,
+        teamName: c.team.name,
+        startsAt: c.startsAt?.toISOString() ?? null,
+        endsAt: c.endsAt?.toISOString() ?? null,
+    }))
 
     // Build pod membership map
     const memberPodIds = new Map<string, Set<string>>()
@@ -179,6 +195,7 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
                                 id: true, identifier: true, title: true, url: true,
                                 priority: true, dueDate: true, updatedAt: true, estimate: true,
                                 state: { name: true }, team: { name: true }, project: { name: true },
+                                cycle: { id: true, number: true, name: true },
                                 history: {
                                     __args: { first: 25, orderBy: 'createdAt' as const },
                                     nodes: { actor: { id: true, name: true, avatarUrl: true } },
@@ -198,7 +215,9 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
                             dueDate: i.dueDate ?? null, updatedAt: i.updatedAt ?? null,
                             estimate: typeof i.estimate === 'number' ? i.estimate : null,
                             stateName: i.state?.name ?? '', teamName: i.team?.name ?? '',
-                            projectName: i.project?.name ?? null, involvedUsers: [...actorMap.values()],
+                            projectName: i.project?.name ?? null,
+                            cycle: i.cycle?.id ? { id: i.cycle.id, number: i.cycle.number ?? 0, name: i.cycle.name ?? null } : null,
+                            involvedUsers: [...actorMap.values()],
                         }
                     })
                     const ip = issues.filter((i) => i.stateName === 'In Progress')
@@ -272,6 +291,7 @@ export default async function PodDetailPage({ params }: { params: Promise<{ id: 
                 allTeams={allTeams}
                 allRoles={allRoles}
                 allPods={allPodsOptions}
+                allCycles={allCycles}
                 fetchedAt={fetchedAt}
                 hasLinearKey={!!apiKey}
             />

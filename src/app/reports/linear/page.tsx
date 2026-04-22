@@ -34,8 +34,19 @@ export type LinearIssue = {
     stateName: string
     teamName: string
     projectName: string | null
+    cycle: { id: string; number: number; name: string | null } | null
     /** People who interacted with this issue (moved state, commented, etc.) — excludes assignee */
     involvedUsers: InvolvedUser[]
+}
+
+export type CycleOption = {
+    id: string
+    number: number
+    name: string | null
+    teamId: string
+    teamName: string
+    startsAt: string | null
+    endsAt: string | null
 }
 
 export type WeekAllocation = {
@@ -76,6 +87,7 @@ export type LinearReportFilters = {
     team: string
     role: string
     pod: string
+    cycle: string
     sort: 'ip_desc' | 'tasks_desc' | 'coverage_asc' | 'name_asc' | 'default'
 }
 
@@ -115,6 +127,7 @@ export default async function LinearReportPage({
     const teamFilter = params.team ?? ''
     const roleFilter = params.role ?? ''
     const podFilter = params.pod ?? ''
+    const cycleFilter = params.cycle ?? ''
     const sort = (['ip_desc', 'tasks_desc', 'coverage_asc', 'name_asc'].includes(params.sort)
         ? params.sort
         : 'default') as LinearReportFilters['sort']
@@ -159,7 +172,7 @@ export default async function LinearReportPage({
     const snapshotAge = snapshot ? today.getTime() - new Date(snapshot.fetchedAt).getTime() : Infinity
     const useSnapshot = snapshotAge < SNAPSHOT_TTL_MS
 
-    const [members, placeholders, projectMembers, weekAllocations, pods] = await Promise.all([
+    const [members, placeholders, projectMembers, weekAllocations, pods, cyclesRaw] = await Promise.all([
         prisma.workspaceMember.findMany({
             where: { workspaceId: member.workspaceId },
             include: {
@@ -201,7 +214,23 @@ export default async function LinearReportPage({
             },
             orderBy: { name: 'asc' },
         }),
+        prisma.linearCycle.findMany({
+            where: { team: { workspaceId: member.workspaceId } },
+            include: { team: { select: { name: true } } },
+            orderBy: { startsAt: 'desc' },
+            take: 30,
+        }),
     ])
+
+    const allCycles: CycleOption[] = cyclesRaw.map((c) => ({
+        id: c.id,
+        number: c.number,
+        name: c.name ?? null,
+        teamId: c.teamId,
+        teamName: c.team.name,
+        startsAt: c.startsAt?.toISOString() ?? null,
+        endsAt: c.endsAt?.toISOString() ?? null,
+    }))
 
     // Build memberId → podId set map
     const memberPodIds = new Map<string, Set<string>>()
@@ -286,6 +315,7 @@ export default async function LinearReportPage({
         if (teamFilter) filtered = filtered.filter((m) => m.issues.some((i) => i.teamName === teamFilter))
         if (roleFilter) filtered = filtered.filter((m) => m.roles.includes(roleFilter))
         if (podFilter) filtered = filtered.filter((m) => m.podIds.includes(podFilter))
+        if (cycleFilter) filtered = filtered.filter((m) => m.issues.some((i) => i.cycle?.id === cycleFilter))
         filtered = sortMembers(filtered, sort)
         if (!isAdmin) filtered = filtered.filter((m) => m.memberId === member!.id)
         return (
@@ -302,9 +332,10 @@ export default async function LinearReportPage({
                     allTeams={allTeams}
                     allRoles={allRoles}
                     allPods={allPods}
+                    allCycles={allCycles}
                     currentMemberPodId={currentMemberPodId}
                     fetchedAt={snapshot!.fetchedAt.toISOString()}
-                    filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, pod: podFilter, sort }}
+                    filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, pod: podFilter, cycle: cycleFilter, sort }}
                 />
             </div>
         )
@@ -390,6 +421,7 @@ export default async function LinearReportPage({
                             state: { name: true },
                             team: { name: true },
                             project: { name: true },
+                            cycle: { id: true, number: true, name: true },
                             history: {
                                 __args: { first: 25, orderBy: 'createdAt' as const },
                                 nodes: {
@@ -430,6 +462,7 @@ export default async function LinearReportPage({
                             stateName: i.state?.name ?? '',
                             teamName: i.team?.name ?? '',
                             projectName: i.project?.name ?? null,
+                            cycle: i.cycle?.id ? { id: i.cycle.id, number: i.cycle.number ?? 0, name: i.cycle.name ?? null } : null,
                             involvedUsers: [...actorMap.values()],
                         }
                     })
@@ -507,6 +540,9 @@ export default async function LinearReportPage({
     if (podFilter) {
         filtered = filtered.filter((m) => m.podIds.includes(podFilter))
     }
+    if (cycleFilter) {
+        filtered = filtered.filter((m) => m.issues.some((i) => i.cycle?.id === cycleFilter))
+    }
     filtered = sortMembers(filtered, sort)
     if (!isAdmin) filtered = filtered.filter((m) => m.memberId === member.id)
 
@@ -531,9 +567,10 @@ export default async function LinearReportPage({
                 allTeams={allTeams}
                 allRoles={allRoles}
                 allPods={allPods}
+                allCycles={allCycles}
                 currentMemberPodId={currentMemberPodId}
                 fetchedAt={fetchedAt.toISOString()}
-                filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, pod: podFilter, sort }}
+                filters={{ q: params.q ?? '', team: teamFilter, role: roleFilter, pod: podFilter, cycle: cycleFilter, sort }}
             />
         </div>
     )

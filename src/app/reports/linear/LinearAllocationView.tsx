@@ -4,11 +4,12 @@ import { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ExternalLink, ChevronDown, ChevronRight, Search, Users, LayoutList, AlertCircle, BarChart2, Layers, Bookmark, BookmarkCheck } from 'lucide-react'
+import { ExternalLink, ChevronDown, ChevronRight, Search, Users, LayoutList, AlertCircle, BarChart2, Layers, Bookmark, BookmarkCheck, Info } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { format, parseISO, formatDistanceToNow, differenceInMinutes } from 'date-fns'
-import type { MemberAllocationData, LinearIssue, LinearReportFilters, InvolvedUser, WeekAllocation, PodOption } from './page'
+import type { MemberAllocationData, LinearIssue, LinearReportFilters, InvolvedUser, WeekAllocation, PodOption, CycleOption } from './page'
 
 const STATUS_ORDER = [
     'In Progress',
@@ -535,6 +536,30 @@ function InvolvedSection({ issues }: { issues: InvolvedIssue[] }) {
 
 const IMPLEMENTING_STATES = new Set(['In Progress', 'Not Started', 'Evaluation', 'Triage'])
 // WAITING_STATES already defined above
+
+function formatCycleLabel(c: CycleOption): string {
+    if (!c.startsAt || !c.endsAt) return `Cycle ${c.number}${c.name ? ` · ${c.name}` : ''}`
+    const start = new Date(c.startsAt)
+    const end = new Date(c.endsAt)
+    const startStr = format(start, 'MMM d')
+    const endStr = start.getMonth() === end.getMonth() ? format(end, 'd') : format(end, 'MMM d')
+    return `Cycle ${c.number} · ${startStr}–${endStr}`
+}
+
+function computeCycleMetrics(m: MemberAllocationData, cycleId: string) {
+    const issues = m.issues.filter((i) => i.cycle?.id === cycleId)
+    const ipIssues = issues.filter((i) => i.stateName === 'In Progress')
+    const estimated = issues.filter((i) => i.estimate !== null).length
+    return {
+        active: issues.length,
+        ipTasks: ipIssues.length,
+        ipPts: ipIssues.reduce((s, i) => s + (i.estimate ?? 0), 0),
+        totalPts: issues.reduce((s, i) => s + (i.estimate ?? 0), 0),
+        ipUnestimated: ipIssues.filter((i) => i.estimate === null).length,
+        estimated,
+        coveragePct: issues.length > 0 ? Math.round((estimated / issues.length) * 100) : 0,
+    }
+}
 
 function MemberCard({ member, involvedIssues = [], allPods = [], podFilter = '' }: { member: MemberAllocationData; involvedIssues?: InvolvedIssue[]; allPods?: PodOption[]; podFilter?: string }) {
     const implementing = [...member.issues]
@@ -1200,6 +1225,7 @@ export function LinearAllocationView({
     allTeams,
     allRoles,
     allPods,
+    allCycles,
     currentMemberPodId,
     fetchedAt,
     filters,
@@ -1210,6 +1236,7 @@ export function LinearAllocationView({
     allTeams: string[]
     allRoles: string[]
     allPods: PodOption[]
+    allCycles: CycleOption[]
     currentMemberPodId: string | null
     fetchedAt: string
     filters: LinearReportFilters
@@ -1292,6 +1319,15 @@ export function LinearAllocationView({
     const totalUnest = withLinear.reduce((s, m) => s + (m.totalTasks - Math.round((m.coveragePct / 100) * m.totalTasks)), 0)
     const teamCoverage = totalTasks > 0 ? Math.round(((totalTasks - totalUnest) / totalTasks) * 100) : 0
 
+    const cycleMemberMetrics = filters.cycle ? visible.map((m) => computeCycleMetrics(m, filters.cycle)) : null
+    const cTotalTasks = cycleMemberMetrics?.reduce((s, cm) => s + cm.active, 0) ?? totalTasks
+    const cTotalIP = cycleMemberMetrics?.reduce((s, cm) => s + cm.ipTasks, 0) ?? totalIP
+    const cTotalIPPts = cycleMemberMetrics?.reduce((s, cm) => s + cm.ipPts, 0) ?? totalIPPts
+    const cTotalPts = cycleMemberMetrics?.reduce((s, cm) => s + cm.totalPts, 0) ?? totalPts
+    const cTotalIPUnest = cycleMemberMetrics?.reduce((s, cm) => s + cm.ipUnestimated, 0) ?? totalIPUnest
+    const cTotalEstimated = cycleMemberMetrics?.reduce((s, cm) => s + cm.estimated, 0) ?? 0
+    const cTeamCoverage = (cycleMemberMetrics && cTotalTasks > 0) ? Math.round((cTotalEstimated / cTotalTasks) * 100) : teamCoverage
+
     const fetchedAtDate = new Date(fetchedAt)
     const staleMinutes = differenceInMinutes(new Date(), fetchedAtDate)
     const isStale = staleMinutes > 5
@@ -1319,7 +1355,17 @@ export function LinearAllocationView({
     }
 
     const activeTab = searchParams.get('tab') ?? 'overview'
-    const isFiltered = filters.q || filters.team || filters.role || filters.pod || filters.sort !== 'default'
+    const isFiltered = filters.q || filters.team || filters.role || filters.pod || !!filters.cycle || filters.sort !== 'default'
+
+    const cyclesByTeam = useMemo(() => {
+        const map = new Map<string, CycleOption[]>()
+        for (const c of allCycles) {
+            const list = map.get(c.teamName) ?? []
+            list.push(c)
+            map.set(c.teamName, list)
+        }
+        return map
+    }, [allCycles])
 
     // Tab badge counts
     const waitingTotal = withLinear.reduce(
@@ -1395,6 +1441,37 @@ export function LinearAllocationView({
                             {allRoles.map((r) => (
                                 <SelectItem key={r} value={r}>{r}</SelectItem>
                             ))}
+                        </SelectContent>
+                    </Select>
+                )}
+
+                {allCycles.length > 0 && (
+                    <Select
+                        defaultValue={filters.cycle || '__all__'}
+                        onValueChange={(v) => router.replace(buildUrl('cycle', v))}
+                    >
+                        <SelectTrigger className="h-8 text-sm w-52 bg-muted/20 border-border/50">
+                            <SelectValue placeholder="All cycles" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="__all__">All cycles</SelectItem>
+                            {[...cyclesByTeam.entries()].map(([teamName, cycles]) => {
+                                const today = new Date()
+                                return (
+                                    <SelectGroup key={teamName}>
+                                        <SelectLabel>{teamName}</SelectLabel>
+                                        {cycles.map((c) => {
+                                            const isCurrent = !!c.startsAt && !!c.endsAt
+                                                && new Date(c.startsAt) <= today && today <= new Date(c.endsAt)
+                                            return (
+                                                <SelectItem key={c.id} value={c.id}>
+                                                    {isCurrent ? '● ' : ''}{formatCycleLabel(c)}
+                                                </SelectItem>
+                                            )
+                                        })}
+                                    </SelectGroup>
+                                )
+                            })}
                         </SelectContent>
                     </Select>
                 )}
@@ -1482,6 +1559,14 @@ export function LinearAllocationView({
                 </span>
             </div>
 
+            {/* Stale snapshot warning — old snapshots won't have cycle data on issues */}
+            {filters.cycle && visible.some((m) => m.issues.length > 0 && m.issues.every((i) => !i.cycle)) && (
+                <div className="flex items-start gap-2.5 rounded-md border border-amber-400/40 bg-amber-400/10 px-4 py-2.5 text-sm text-amber-700 dark:text-amber-400">
+                    <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                    <span>Snapshot may predate cycle tracking. Metrics may not reflect the selected cycle accurately until the next refresh.</span>
+                </div>
+            )}
+
             {/* Tabbed sections */}
             <Tabs value={activeTab} onValueChange={(v) => router.replace(buildUrl('tab', v))}>
                 <TabsList className="h-9 bg-muted/30 border border-border/40 w-full justify-start gap-0.5 px-1">
@@ -1529,117 +1614,150 @@ export function LinearAllocationView({
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-border/40 bg-muted/20">
-                                        {['Member', 'Roles', 'Sched h/d', 'Active', 'In Progress', 'IP Pts', 'Total Pts', 'Unest.', 'Coverage'].map((h) => (
+                                        {([
+                                            { label: 'Member', tip: null },
+                                            { label: 'Roles', tip: 'Guilds this member belongs to' },
+                                            { label: 'Sched h/d', tip: 'Scheduled hours per day from Forecast this week' },
+                                            { label: 'Active', tip: 'Total Linear issues currently assigned (all non-done states)' },
+                                            { label: 'In Progress', tip: 'Issues in an actively implementing state (In Progress, QA, Pending Code Review)' },
+                                            { label: 'IP Pts', tip: 'Story points for In Progress issues' },
+                                            { label: 'Total Pts', tip: 'Total story points across all active issues' },
+                                            { label: 'Unest.', tip: 'Unestimated In Progress issues — issues with no story points assigned' },
+                                            { label: 'Coverage', tip: 'Percentage of active issues that have story point estimates' },
+                                        ] as { label: string; tip: string | null }[]).map(({ label, tip }) => (
                                             <th
-                                                key={h}
+                                                key={label}
                                                 className="py-2 px-4 text-left text-[11px] font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap"
                                             >
-                                                {h}
+                                                {tip ? (
+                                                    <TooltipProvider delayDuration={200}>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <span className="inline-flex items-center gap-1 cursor-default">
+                                                                    {label}
+                                                                    <Info className="size-2.5 opacity-40" />
+                                                                </span>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="max-w-[220px] text-xs">
+                                                                {tip}
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                ) : label}
                                             </th>
                                         ))}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {visible.map((m) => (
-                                        <tr
-                                            key={m.memberId}
-                                            className={`border-b border-border/40 hover:bg-muted/20 transition-colors ${(!m.hasLinearToken || m.isPlaceholder) ? 'opacity-50' : m.totalTasks === 0 ? 'opacity-40' : ''}`}
-                                        >
-                                            <td className="py-2.5 px-4">
-                                                <div className="flex items-center gap-2">
-                                                    <MemberAvatar member={m} size={24} />
-                                                    <span className="text-sm font-medium text-foreground/80">{m.name}</span>
-                                                    {m.isPlaceholder && (
-                                                        <span className="text-[10px] text-amber-600 dark:text-amber-400 border border-amber-400/40 bg-amber-400/10 rounded px-1 py-0.5">
-                                                            Placeholder
-                                                        </span>
-                                                    )}
-                                                    {!m.hasLinearToken && !m.isPlaceholder && (
-                                                        <span className="text-[10px] text-muted-foreground border border-border/60 rounded px-1 py-0.5">
-                                                            No Linear
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="py-2.5 px-4 max-w-[128px]">
-                                                {m.roles.length > 0 ? (
-                                                    <div className="flex flex-wrap gap-1" title={m.roles.join(', ')}>
-                                                        {m.roles.slice(0, 2).map((r) => (
-                                                            <span key={r} className="text-[10px] text-muted-foreground border border-border/40 rounded px-1.5 py-0.5 whitespace-nowrap truncate max-w-[80px]">
-                                                                {r}
-                                                            </span>
-                                                        ))}
-                                                        {m.roles.length > 2 && (
-                                                            <span className="text-[10px] text-muted-foreground">+{m.roles.length - 2}</span>
+                                    {visible.map((m) => {
+                                        const cm = filters.cycle ? computeCycleMetrics(m, filters.cycle) : null
+                                        const active = cm?.active ?? m.totalTasks
+                                        const ipTasks = cm?.ipTasks ?? m.ipTasks
+                                        const ipPts = cm?.ipPts ?? m.ipPts
+                                        const mTotalPts = cm?.totalPts ?? m.totalPts
+                                        const ipUnestimated = cm?.ipUnestimated ?? m.ipUnestimated
+                                        const coveragePct = cm?.coveragePct ?? m.coveragePct
+                                        return (
+                                                <tr
+                                                    key={m.memberId}
+                                                    className={`border-b border-border/40 hover:bg-muted/20 transition-colors ${(!m.hasLinearToken || m.isPlaceholder) ? 'opacity-50' : active === 0 ? 'opacity-40' : ''}`}
+                                                >
+                                                    <td className="py-2.5 px-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <MemberAvatar member={m} size={24} />
+                                                            <span className="text-sm font-medium text-foreground/80">{m.name}</span>
+                                                            {m.isPlaceholder && (
+                                                                <span className="text-[10px] text-amber-600 dark:text-amber-400 border border-amber-400/40 bg-amber-400/10 rounded px-1 py-0.5">
+                                                                    Placeholder
+                                                                </span>
+                                                            )}
+                                                            {!m.hasLinearToken && !m.isPlaceholder && (
+                                                                <span className="text-[10px] text-muted-foreground border border-border/60 rounded px-1 py-0.5">
+                                                                    No Linear
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-2.5 px-4 max-w-[128px]">
+                                                        {m.roles.length > 0 ? (
+                                                            <div className="flex flex-wrap gap-1" title={m.roles.join(', ')}>
+                                                                {m.roles.slice(0, 2).map((r) => (
+                                                                    <span key={r} className="text-[10px] text-muted-foreground border border-border/40 rounded px-1.5 py-0.5 whitespace-nowrap truncate max-w-[80px]">
+                                                                        {r}
+                                                                    </span>
+                                                                ))}
+                                                                {m.roles.length > 2 && (
+                                                                    <span className="text-[10px] text-muted-foreground">+{m.roles.length - 2}</span>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-xs text-muted-foreground">—</span>
                                                         )}
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-xs text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                            <td className="py-2.5 px-4 whitespace-nowrap">
-                                                {m.currentWeekAllocations.length > 0 ? (() => {
-                                                    const total = m.currentWeekAllocations.reduce((s, a) => s + a.hoursPerDay, 0)
-                                                    const label = Number.isInteger(total) ? `${total}h` : `${total.toFixed(1)}h`
-                                                    return (
-                                                        <span className={`text-sm font-medium ${total > 7.5 ? 'text-amber-500 dark:text-amber-400' : 'text-foreground/80'}`}>
-                                                            {label}
-                                                        </span>
-                                                    )
-                                                })() : (
-                                                    <span className="text-sm text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                            <td className="py-2.5 px-4 text-sm text-foreground/80">{m.totalTasks || '—'}</td>
-                                            <td className="py-2.5 px-4">
-                                                {m.ipTasks > 0 ? (
-                                                    <span className="text-sm font-medium text-blue-500 dark:text-blue-400">{m.ipTasks}</span>
-                                                ) : (
-                                                    <span className="text-sm text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                            <td className="py-2.5 px-4">
-                                                {m.ipPts > 0 ? (
-                                                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{m.ipPts} pts</span>
-                                                ) : (
-                                                    <span className="text-sm text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                            <td className="py-2.5 px-4 text-sm text-foreground/80">
-                                                {m.totalPts > 0 ? `${m.totalPts} pts` : '—'}
-                                            </td>
-                                            <td className="py-2.5 px-4">
-                                                {m.ipUnestimated > 0 ? (
-                                                    <span className="text-sm text-red-500">{m.ipUnestimated}</span>
-                                                ) : m.ipTasks > 0 ? (
-                                                    <span className="text-sm text-emerald-600 dark:text-emerald-400">✓</span>
-                                                ) : (
-                                                    <span className="text-sm text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                            <td className="py-2.5 px-4">
-                                                {m.hasLinearToken && !m.isPlaceholder ? (
-                                                    <span className={`text-sm font-semibold ${coverageColor(m.coveragePct, true)}`}>
-                                                        {m.coveragePct}%
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-sm text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                    </td>
+                                                    <td className="py-2.5 px-4 whitespace-nowrap">
+                                                        {m.currentWeekAllocations.length > 0 ? (() => {
+                                                            const total = m.currentWeekAllocations.reduce((s, a) => s + a.hoursPerDay, 0)
+                                                            const label = Number.isInteger(total) ? `${total}h` : `${total.toFixed(1)}h`
+                                                            return (
+                                                                <span className={`text-sm font-medium ${total > 7.5 ? 'text-amber-500 dark:text-amber-400' : 'text-foreground/80'}`}>
+                                                                    {label}
+                                                                </span>
+                                                            )
+                                                        })() : (
+                                                            <span className="text-sm text-muted-foreground">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-2.5 px-4 text-sm text-foreground/80">{active || '—'}</td>
+                                                    <td className="py-2.5 px-4">
+                                                        {ipTasks > 0 ? (
+                                                            <span className="text-sm font-medium text-blue-500 dark:text-blue-400">{ipTasks}</span>
+                                                        ) : (
+                                                            <span className="text-sm text-muted-foreground">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-2.5 px-4">
+                                                        {ipPts > 0 ? (
+                                                            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{ipPts} pts</span>
+                                                        ) : (
+                                                            <span className="text-sm text-muted-foreground">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-2.5 px-4 text-sm text-foreground/80">
+                                                        {mTotalPts > 0 ? `${mTotalPts} pts` : '—'}
+                                                    </td>
+                                                    <td className="py-2.5 px-4">
+                                                        {ipUnestimated > 0 ? (
+                                                            <span className="text-sm text-red-500">{ipUnestimated}</span>
+                                                        ) : ipTasks > 0 ? (
+                                                            <span className="text-sm text-emerald-600 dark:text-emerald-400">✓</span>
+                                                        ) : (
+                                                            <span className="text-sm text-muted-foreground">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-2.5 px-4">
+                                                        {m.hasLinearToken && !m.isPlaceholder ? (
+                                                            <span className={`text-sm font-semibold ${coverageColor(coveragePct, true)}`}>
+                                                                {coveragePct}%
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-sm text-muted-foreground">—</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                        )
+                                    })}
                                 </tbody>
                                 <tfoot>
                                     <tr className="border-t border-border/50 bg-muted/30">
                                         <td className="py-2.5 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider" colSpan={2}>Total</td>
                                         <td className="py-2.5 px-4 text-sm text-muted-foreground">—</td>
-                                        <td className="py-2.5 px-4 text-sm font-semibold text-foreground">{totalTasks}</td>
-                                        <td className="py-2.5 px-4 text-sm font-semibold text-blue-500 dark:text-blue-400">{totalIP}</td>
-                                        <td className="py-2.5 px-4 text-sm font-bold text-emerald-600 dark:text-emerald-400">{totalIPPts} pts</td>
-                                        <td className="py-2.5 px-4 text-sm font-bold text-foreground">{totalPts} pts</td>
-                                        <td className="py-2.5 px-4 text-sm font-semibold text-red-500">{totalIPUnest || '—'}</td>
+                                        <td className="py-2.5 px-4 text-sm font-semibold text-foreground">{cTotalTasks}</td>
+                                        <td className="py-2.5 px-4 text-sm font-semibold text-blue-500 dark:text-blue-400">{cTotalIP}</td>
+                                        <td className="py-2.5 px-4 text-sm font-bold text-emerald-600 dark:text-emerald-400">{cTotalIPPts} pts</td>
+                                        <td className="py-2.5 px-4 text-sm font-bold text-foreground">{cTotalPts} pts</td>
+                                        <td className="py-2.5 px-4 text-sm font-semibold text-red-500">{cTotalIPUnest || '—'}</td>
                                         <td className="py-2.5 px-4">
-                                            <span className={`text-sm font-bold ${coverageColor(teamCoverage, true)}`}>{teamCoverage}%</span>
+                                            <span className={`text-sm font-bold ${coverageColor(cTeamCoverage, true)}`}>{cTeamCoverage}%</span>
                                         </td>
                                     </tr>
                                 </tfoot>

@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { LinearAllocationView } from '@/app/reports/linear/LinearAllocationView'
 import { CapacitySummary } from './CapacitySummary'
 import { COLOR_HEX_MAP } from '@/lib/project-colors'
-import type { MemberAllocationData, PodOption } from '@/app/reports/linear/page'
+import type { MemberAllocationData, PodOption, CycleOption } from '@/app/reports/linear/page'
 import type { CapacityAllocation } from './CapacitySummary'
 
 interface PodSlot {
@@ -42,6 +42,7 @@ interface PodDetailTabsProps {
     allTeams: string[]
     allRoles: string[]
     allPods: PodOption[]
+    allCycles: CycleOption[]
     fetchedAt: string
     hasLinearKey: boolean
 }
@@ -59,7 +60,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 export function PodDetailTabs({
     pod, slots, projects, allocations, workloadMembers,
-    allTeams, allRoles, allPods, fetchedAt, hasLinearKey,
+    allTeams, allRoles, allPods, allCycles, fetchedAt, hasLinearKey,
 }: PodDetailTabsProps) {
     const filledSlots = slots.filter((s) => s.memberId !== null)
     const memberNames = new Map(filledSlots.map((s) => [s.memberId!, s.memberName ?? 'Unknown']))
@@ -231,9 +232,10 @@ export function PodDetailTabs({
                         allTeams={allTeams}
                         allRoles={allRoles}
                         allPods={allPods}
+                        allCycles={allCycles}
                         currentMemberPodId={pod.id}
                         fetchedAt={fetchedAt}
-                        filters={{ q: '', team: '', role: '', pod: pod.id, sort: 'default' }}
+                        filters={{ q: '', team: '', role: '', pod: pod.id, cycle: '', sort: 'default' }}
                         lockedPodId={pod.id}
                     />
                 )}

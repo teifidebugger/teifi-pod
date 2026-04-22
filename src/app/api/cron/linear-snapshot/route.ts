@@ -176,6 +176,7 @@ export async function GET(req: NextRequest) {
                             state: { name: true },
                             team: { name: true },
                             project: { name: true },
+                            cycle: { id: true, number: true, name: true },
                             history: {
                                 __args: { first: 25, orderBy: 'createdAt' as const },
                                 nodes: {
@@ -207,6 +208,7 @@ export async function GET(req: NextRequest) {
                             stateName: i.state?.name ?? '',
                             teamName: i.team?.name ?? '',
                             projectName: i.project?.name ?? null,
+                            cycle: i.cycle?.id ? { id: i.cycle.id, number: i.cycle.number ?? 0, name: i.cycle.name ?? null } : null,
                             involvedUsers: [...actorMap.values()],
                         }
                     })
