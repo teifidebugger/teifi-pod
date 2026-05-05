@@ -244,6 +244,12 @@ export default async function LinearReportPage({
     }
     const allPods: PodOption[] = pods.map((p) => ({ id: p.id, name: p.name }))
 
+    // Build memberId → current roles map (re-resolved fresh so role filter works even with stale snapshot)
+    const memberRoles = new Map<string, string[]>()
+    for (const m of members) {
+        memberRoles.set(m.id, m.roles)
+    }
+
     // Build memberId → allocated Linear team names map
     const memberAllocatedTeams = new Map<string, Set<string>>()
     for (const pm of projectMembers) {
@@ -289,10 +295,11 @@ export default async function LinearReportPage({
 
     // Serve from snapshot if fresh enough
     if (useSnapshot) {
-        // Re-resolve podIds fresh — pod assignments may change within snapshot TTL
+        // Re-resolve podIds + roles fresh — both can change within snapshot TTL
         const snapshotData = (snapshot!.data as MemberAllocationData[]).map((m) => ({
             ...m,
             podIds: [...(memberPodIds.get(m.memberId) ?? [])],
+            roles: memberRoles.get(m.memberId) ?? m.roles ?? [],
         }))
         const placeholderData: MemberAllocationData[] = placeholders.map((p) => ({
             memberId: `placeholder:${p.id}`,
