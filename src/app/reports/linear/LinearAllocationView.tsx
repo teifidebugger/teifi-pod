@@ -1296,6 +1296,7 @@ export function LinearAllocationView({
         for (const assignee of withLinear) {
             if (assignee.isPlaceholder) continue
             for (const issue of assignee.issues) {
+                if (!ALIGNMENT_ACTIVE_STATES.has(issue.stateName)) continue
                 for (const u of issue.involvedUsers) {
                     if (!map.has(u.id)) map.set(u.id, [])
                     map.get(u.id)!.push({ ...issue, assigneeName: assignee.name, assigneeAvatar: assignee.avatarUrl })
